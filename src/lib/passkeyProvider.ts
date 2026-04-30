@@ -22,8 +22,8 @@ export interface WebAuthnConfig {
 }
 
 const defaultConfig: WebAuthnConfig = {
-  rpName: 'https://bitlasso.xyz',
-  rpId: 'keys.breez.technology',
+  rpName: 'Bitlasso',
+  rpId: window.location.hostname,
 };
 
 // ============================================

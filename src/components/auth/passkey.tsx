@@ -10,7 +10,7 @@ import { passkeyPrfProvider } from '@/lib/passkeyProvider';
 import type { Seed } from '@breeztech/breez-sdk-spark/web';
 import { useEffect, useRef, useState } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
-import { AlertTriangleIcon, CheckIcon } from 'lucide-react';
+import { AlertTriangleIcon } from 'lucide-react';
 import { Spinner } from '../ui/spinner';
 import { Button } from '../ui/button';
 
@@ -18,18 +18,15 @@ import { Button } from '../ui/button';
  * Phase state machine.
  *
  * On mount: "Use Passkey" was clicked → try listLabels() immediately.
- *   Success → passkey exists → returning user flow (auth-pick or connect-ready)
+ *   Success → passkey exists → returning user flow (connect-ready)
  *   Failure → no passkey    → new user flow (review)
  *
  * New user flow:
- *   detecting → review → creating (prompt 1) → new-storing (prompt 2)
- *             → connecting (prompt 3) → initializing
+ *   detecting → review → creating  → new-storing 
+ *             → connecting
  *
  * Returning user flow (existing label):
- *   detecting (prompt 1) → auth-pick → connecting (prompt 2) → initializing
- *
- * Returning user flow (new label):
- *   detecting (prompt 1) → auth-pick → new-storing (prompt 2) → connecting (prompt 3) → initializing
+ *   detecting (prompt 1) → auth-pick → connecting → initializing
  */
 type Phase =
     | 'detecting'       // On mount: listLabels() — WebAuthn prompt, doubles as detection
@@ -38,10 +35,9 @@ type Phase =
     | 'creating'        // createPasskey() in progress (prompt)
     | 'new-storing'     // saveLabel() in progress (prompt)
     // Returning user flow
-    | 'auth-pick'       // Authenticate step: label picker
+    | 'restore'       // Authenticate step: label picker
     // Shared
     | 'connecting'      // Connect to Nostr step: getWallet() in progress (prompt)
-    | 'initializing';   // Initialize step: SDK connecting
 
 // ============================================
 // Props
@@ -60,51 +56,26 @@ interface PasskeyPageProps {
 
 const PasskeyPage: React.FC<PasskeyPageProps> = ({
     onWalletRestored,
-    onBack,
-    sdkConnected,
-    onFlowComplete,
+    onBack
 }) => {
     const [phase, setPhase] = useState<Phase>('detecting');
-    const [isNewUser, setIsNewUser] = useState(false);
-    const [labels, setLabels] = useState<string[]>([]);
-    const [selectedLabel, setSelectedLabel] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
-    const [manualLabel, setManualLabel] = useState('');
-    const [showManualInput, setShowManualInput] = useState(false);
-    const [detectingText, setDetectingText] = useState('Detecting passkey...');
 
     // Stable refs for callbacks (avoid stale closures in effects)
     const onWalletRestoredRef = useRef(onWalletRestored);
     onWalletRestoredRef.current = onWalletRestored;
-    const onFlowCompleteRef = useRef(onFlowComplete);
-    onFlowCompleteRef.current = onFlowComplete;
 
     // Label to use when entering the connecting phase
-    const connectLabelRef = useRef<string | undefined>(undefined);
+    const connectLabel = 'Default';
 
     // ============================================
     // Effects — auto-triggered phases
     // ============================================
 
-    // SDK finished connecting → complete flow
-    useEffect(() => {
-        if (sdkConnected && phase === 'initializing') {
-            onFlowCompleteRef.current?.();
-        }
-    }, [sdkConnected, phase]);
-
     // On mount: detect passkey by trying listLabels() (WebAuthn get).
-    // The "Use Passkey" button click on HomePage is the user interaction.
-    // Success → passkey exists → returning user.
-    // Failure → no passkey / cancelled → new user flow.
     useEffect(() => {
         if (phase !== 'detecting') return;
         let cancelled = false;
-
-        // Update spinner text once WebAuthn prompt completes
-        passkeyPrfProvider.onAuthComplete = () => {
-            if (!cancelled) setDetectingText('Discovering labels...');
-        };
 
         const run = async () => {
             try {
@@ -113,21 +84,15 @@ const PasskeyPage: React.FC<PasskeyPageProps> = ({
 
                 // Passkey exists → returning user
                 if (found.length === 0) {
-                    // Passkey exists but no labels on relays — show picker with default pre-filled
-                    setShowManualInput(true);
-                    setManualLabel('Default');
-                    setPhase('auth-pick');
+                    // Passkey exists but no labels on relays → auto-create "Default"
+                    // and skip the picker. Mirrors the new-passkey path.
+                    setPhase('new-storing');
                 } else {
-                    // Display oldest → newest
-                    const sorted = [...found].reverse();
-                    setLabels(sorted);
-                    const defaultIdx = sorted.indexOf('Default');
-                    setSelectedLabel(defaultIdx !== -1 ? sorted[defaultIdx] : sorted[0]);
-                    setPhase('auth-pick');
+                    setPhase('connecting');
                 }
             } catch (e) {
+                console.log('No passkey detected with listLabels():', e);
                 if (cancelled) return;
-                // No passkey or user cancelled → new user flow
                 setPhase('review');
             }
         };
@@ -146,11 +111,13 @@ const PasskeyPage: React.FC<PasskeyPageProps> = ({
 
         const run = async () => {
             try {
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Short delay to ensure UX flow
+                console.log('Creating passkey with createPasskey() — this will trigger a WebAuthn prompt');
                 await createPasskey();
                 if (cancelled) return;
-                connectLabelRef.current = 'Default';
                 setPhase('new-storing');
             } catch (e) {
+                console.error('Error creating passkey:', e);
                 if (cancelled) return;
                 setError('Failed to create passkey');
             }
@@ -167,16 +134,12 @@ const PasskeyPage: React.FC<PasskeyPageProps> = ({
 
         const run = async () => {
             try {
-                const labelToSave = connectLabelRef.current ?? 'Default';
-                await saveLabel(labelToSave);
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Short delay to ensure UX flow
+                await saveLabel(connectLabel);
                 if (cancelled) return;
                 // Don't setPasskeyMode here — wait until connecting succeeds to avoid
                 // auto-reconnect on refresh before onboarding completes
                 // Add newly saved label to the list so auth-pick is up-to-date on Go Back
-                setLabels(prev => prev.includes(labelToSave) ? prev : [...prev, labelToSave]);
-                setSelectedLabel(labelToSave);
-                setShowManualInput(false);
-                setManualLabel('');
                 setPhase('connecting');
             } catch (e) {
                 if (cancelled) return;
@@ -195,15 +158,14 @@ const PasskeyPage: React.FC<PasskeyPageProps> = ({
 
         const run = async () => {
             try {
-                const w = await getWallet(connectLabelRef.current);
+                const w = await getWallet(connectLabel);
+
+                console.log('Derived wallet from passkey with getWallet()');
                 if (cancelled) return;
 
                 // Remember label locally
-                if (connectLabelRef.current) {
-                    setPasskeyMode(connectLabelRef.current);
-                }
+                setPasskeyMode(connectLabel);
 
-                setPhase('initializing');
                 onWalletRestoredRef.current(w.seed, w.label);
             } catch (e) {
                 if (cancelled) return;
@@ -225,27 +187,7 @@ const PasskeyPage: React.FC<PasskeyPageProps> = ({
     /** Navigate back from an error state to the previous interactive phase. */
     const handleErrorBack = () => {
         setError(null);
-        switch (phase) {
-            case 'creating':
-                onBack();
-                break;
-            case 'new-storing':
-                if (isNewUser) {
-                    onBack();              // New user: passkey created, nothing interactive to go back to
-                } else {
-                    setPhase('auth-pick');  // Returning user: back to label picker
-                }
-                break;
-            case 'connecting':
-                if (isNewUser) {
-                    onBack();  // New user: passkey + label saved, nothing to go back to
-                } else {
-                    setPhase('auth-pick');  // Returning user: back to label picker (label list is up-to-date)
-                }
-                break;
-            default:
-                onBack();
-        }
+        onBack();  // Returning user: nothing interactive to go back to
     };
 
     // ============================================
@@ -255,8 +197,8 @@ const PasskeyPage: React.FC<PasskeyPageProps> = ({
     const renderReview = () => (
         <>
             <div className="flex flex-col gap-10">
-                <h1 className="w-full font-serif text-4xl font-normal text-foreground">Create your <span className="text-primary">passkey.</span></h1>
-                <p className="text-muted-foreground">A passkey will be created on your device to secure your funds.</p>
+                <h1 className="w-full font-serif text-4xl font-normal text-primary">Passkey <span className="text-foreground">authentication.</span></h1>
+                <p className="text-muted-foreground">Passwordless authentication using a passkey stored on your device.</p>
             </div>
 
             {phase == 'review' &&
@@ -269,107 +211,31 @@ const PasskeyPage: React.FC<PasskeyPageProps> = ({
                         </p>
                     </AlertDescription>
                 </Alert>}
-
-            <div className="flex-1" />
         </>
     );
 
+    const renderCreating = () => (
+        <>
+            <div className="flex flex-col gap-10">
+                <h1 className="w-full font-serif text-4xl font-normal text-primary">Creating <span className="text-foreground">passkey.</span></h1>
+                <p className="text-muted-foreground">Please follow the prompts in your browser to create a new passkey.</p>
+            </div>
 
-    const renderAuthPick = () => {
-        const trimmedManual = manualLabel.trim();
-        const isDuplicate = trimmedManual
-            ? labels.some((l) => l.toLowerCase() === trimmedManual.toLowerCase())
-            : false;
+            {phase === 'creating' && <p className="text-spark-text-secondary text-sm">A passkey is creating on your device...</p>}
+            {phase === 'new-storing' && <p className="text-spark-text-secondary text-sm">Saving metadata retrieval to Nostr relays...</p>}
+            <Spinner />
+        </>
+    );
 
-        return (
-            <>
-                <div className="text-center mb-4">
-                    <h2 className="text-xl font-display font-bold text-spark-text-primary mb-2">
-                        Select a label
-                    </h2>
-                    <p className="text-spark-text-secondary text-sm">
-                        Select an existing label or create a new one to connect with.
-                    </p>
-                </div>
-
-                <div className="space-y-2">
-                    {labels.map((label) => (
-                        <button
-                            key={label}
-                            onClick={() => {
-                                setSelectedLabel(label);
-                                setManualLabel('');
-                                setShowManualInput(false);
-                            }}
-                            className={`
-                w-full p-4 rounded-2xl border text-left transition-all
-                ${selectedLabel === label && !showManualInput
-                                    ? 'bg-spark-primary/10 border-spark-primary'
-                                    : 'bg-spark-dark border-spark-border hover:border-spark-border-light'
-                                }
-              `}
-                        >
-                            <div className="flex items-center justify-between">
-                                <span className="font-display font-medium text-spark-text-primary">
-                                    {label}
-                                </span>
-                                <div className={`w-6 h-6 rounded-full flex items-center justify-center ${selectedLabel === label && !showManualInput ? 'bg-spark-primary' : 'bg-transparent'}`}>
-                                    {selectedLabel === label && !showManualInput && (
-                                        <CheckIcon size="sm" className="text-white" />
-                                    )}
-                                </div>
-                            </div>
-                        </button>
-                    ))}
-
-                    {/* Create new label */}
-                    {!showManualInput ? (
-                        <button
-                            type="button"
-                            onClick={() => setShowManualInput(true)}
-                            className="w-full p-4 rounded-2xl border bg-spark-dark border-spark-border hover:border-spark-border-light text-left transition-all"
-                        >
-                            <span className="text-sm font-medium text-spark-text-secondary">
-                                Create a new label...
-                            </span>
-                        </button>
-                    ) : (
-                        <div className="w-full p-4 rounded-2xl border transition-all bg-spark-primary/10 border-spark-primary">
-                            <div className="flex items-center justify-between mb-2">
-                                <span className="text-sm font-medium text-spark-text-secondary">
-                                    Create a new label
-                                </span>
-                                <div className={`w-6 h-6 rounded-full flex items-center justify-center ${trimmedManual && !isDuplicate ? 'bg-spark-primary' : 'bg-transparent'}`}>
-                                    {trimmedManual && !isDuplicate && (
-                                        <CheckIcon size="sm" className="text-white" />
-                                    )}
-                                </div>
-                            </div>
-                            <input
-                                type="text"
-                                value={manualLabel}
-                                onChange={(e) => {
-                                    const val = e.target.value;
-                                    if (/^[a-zA-Z0-9 ]*$/.test(val) && val.length <= 24) {
-                                        setManualLabel(val);
-                                    }
-                                }}
-                                placeholder="Label name"
-                                maxLength={24}
-                                className="w-full bg-spark-surface border border-spark-border rounded-xl px-3 py-2 text-spark-text-primary placeholder:text-spark-text-muted focus:outline-none focus:ring-2 focus:ring-spark-primary/50 focus:border-spark-primary text-sm"
-                                autoFocus
-                            />
-                            {isDuplicate && (
-                                <p className="text-red-400 text-xs mt-1">
-                                    A label with this name already exists
-                                </p>
-                            )}
-                        </div>
-                    )}
-                </div>
-            </>
-        );
-    };
+     const renderConnecting = () => (
+        <>
+            <div className="flex flex-col gap-10">
+                <h1 className="w-full font-serif text-4xl font-normal text-primary">Connecting <span className="text-foreground">passkey.</span></h1>
+                <p className="text-muted-foreground">The wallet is being initialized...</p>
+            </div>
+            <Spinner />
+        </>
+    );
 
     const renderSpinner = (text?: string) => (
         <div className="flex flex-col items-center justify-center py-16">
@@ -377,25 +243,19 @@ const PasskeyPage: React.FC<PasskeyPageProps> = ({
         </div>
     );
 
-
     // ============================================
     // Content & footer routing
     // ============================================
 
     const content = (() => {
         switch (phase) {
-            case 'detecting': return renderSpinner(detectingText);
+            case 'detecting': return renderSpinner('Detecting passkey...');
             case 'review': return renderReview();
-            case 'creating': return error ? renderReview() : renderSpinner('Initializing passkey...');
+            case 'creating': return error ? renderReview() : renderCreating();
             case 'new-storing':
-                if (error) return null;
-                return renderSpinner('Saving label...');
-            case 'auth-pick': return renderAuthPick();
+                return renderCreating();
             case 'connecting':
-                if (error) return null;
-                return renderSpinner('Starting Glow...');
-            case 'initializing':
-                return renderSpinner('Starting Glow...');
+                return renderConnecting();
         }
     })();
 
@@ -415,46 +275,9 @@ const PasskeyPage: React.FC<PasskeyPageProps> = ({
                 <div className='flex flex-col lg:flex-row gap-2'>
                     <Button className='' variant='outline' onClick={() => onBack()}>Back</Button>
                     <Button onClick={() => {
-                        setIsNewUser(true);
                         setError(null);
                         setPhase('creating');
                     }} >I understand</Button>
-                </div>
-            );
-        }
-
-        if (phase === 'auth-pick') {
-            const trimmedManual = manualLabel.trim();
-            const isDuplicate = trimmedManual
-                ? labels.some((l) => l.toLowerCase() === trimmedManual.toLowerCase())
-                : false;
-            const canConnect = showManualInput
-                ? !!(trimmedManual && !isDuplicate)
-                : !!selectedLabel;
-            return (
-                <div className="max-w-xl mx-auto space-y-3">
-                    <Button
-                        className="w-full"
-                        disabled={!canConnect}
-                        onClick={() => {
-                            if (showManualInput) {
-                                // New label → save to relays first, then connect
-                                connectLabelRef.current = trimmedManual;
-                                setError(null);
-                                setPhase('new-storing');
-                            } else {
-                                // Existing label → connect directly
-                                connectLabelRef.current = selectedLabel || undefined;
-                                setError(null);
-                                setPhase('connecting');
-                            }
-                        }}
-                    >
-                        Continue
-                    </Button>
-                    <Button variant='outline' className="w-full" onClick={onBack}>
-                        Go Back
-                    </Button>
                 </div>
             );
         }
@@ -467,9 +290,13 @@ const PasskeyPage: React.FC<PasskeyPageProps> = ({
     // ============================================
 
     return (
-        // <PageLayout onBack={onBack} footer={footer} title="Get Started">
         <div className="max-w-xl mx-auto w-full flex flex-col min-h-full gap-5">
             <div className="mt-6 space-y-4 flex flex-col flex-1">
+                <div className='flex gap-2'>
+                    <div className={`rounded-full w-2 h-2 bg-gray-200/50 ${phase === 'review' ? 'bg-primary animate-pulse' : ''}`}></div>
+                    <div className={`rounded-full w-2 h-2 bg-gray-200/50 ${phase === 'creating' || phase === 'new-storing' ? 'bg-primary animate-pulse' : ''}`}></div>
+                    <div className={`rounded-full w-2 h-2 bg-gray-200/50 ${phase === 'connecting' ? 'bg-primary animate-pulse' : ''}`}></div>
+                </div>
                 {content}
                 {error && (
                     <Alert className="bg-primary/10 border-1 border-primary/20">
@@ -487,7 +314,6 @@ const PasskeyPage: React.FC<PasskeyPageProps> = ({
             </div>
             {footer}
         </div>
-        // </PageLayout>
     );
 };
 

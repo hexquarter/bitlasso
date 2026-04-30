@@ -77,13 +77,13 @@ export const SettingsPage = () => {
 
             if (nostrExtension) {
                 const nostrConnection = await connectViaExtension()
-                if (nostrConnection.pubkey !== wallet.nostrConnection.pubkey) {
-                    setNostrBackup(undefined)
+                const encryptedPassphrase = await fetchEncryptedPassphrase(wallet.nostrConnection.pubkey)
+                if (!encryptedPassphrase) {
+                    setNostrBackup(false)
+                    return
                 }
-                else {
-                    const encryptedPassphrase = await fetchEncryptedPassphrase(nostrConnection.pubkey)
-                    setNostrBackup(encryptedPassphrase !== undefined)
-                }
+
+                setNostrBackup(nostrConnection.pubkey !== wallet.nostrConnection.pubkey)
             }
 
             if (wallet) {

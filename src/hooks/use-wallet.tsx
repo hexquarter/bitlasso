@@ -3,6 +3,7 @@ import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import posthog from 'posthog-js';
 import type { Seed } from '@breeztech/breez-sdk-spark/web';
+import { getWallet, isPasskeyMode } from '@/lib/passkey';
 
 export interface WalletContextType {
     storeWallet: (mnemonic: string) => Promise<Wallet>;
@@ -40,6 +41,14 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     const loadWallet = async () => {
         if (walletRef.current) {
             return walletRef.current
+        }
+
+        if (isPasskeyMode()) {
+            console.log('Passkey mode detected — awaiting authentication...')
+            const passkeyWallet = await getWallet()
+            setWalletExists(true)
+            const wallet = await connectWithSeed(passkeyWallet.seed)
+            return wallet
         }
 
         const mnemonic = localStorage.getItem('BITLASSO_MNEMONIC')

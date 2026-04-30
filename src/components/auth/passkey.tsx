@@ -197,7 +197,7 @@ const PasskeyPage: React.FC<PasskeyPageProps> = ({
     const renderDetecting = () => (
         <>
             <div className="flex flex-col gap-10">
-                <h1 className="w-full font-serif text-4xl font-normal text-primary">Creating <span className="text-foreground">passkey.</span></h1>
+                <h1 className="w-full font-serif text-4xl font-normal text-primary">Passkey <span className="text-foreground">authentication.</span></h1>
                 <p className="text-muted-foreground">Detecting passkey...</p>
             </div>
 

@@ -23,7 +23,7 @@ async function init() {
 
   // Initialise the WebAssembly module
   await initBreezSDK();
-  await initLogging(logger)
+  // await initLogging(logger)
 
   createRoot(document.getElementById('root')!).render(
     <StrictMode>

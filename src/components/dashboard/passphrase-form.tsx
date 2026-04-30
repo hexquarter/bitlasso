@@ -104,7 +104,7 @@ export const PassphraseForm: React.FC<Props> = ({ onSubmit, onBack, loading = fa
                     ))}
                 </div>
                 <div className={`flex flex-col lg:flex-row gap-2 ${loading ? 'justify-center' : ''}`}>
-                    {!loading && <Button className='flex-1 w-full' variant='outline' onClick={() => onBack()}>Back</Button>}
+                    {!loading && <div><Button className='flex-1 w-full' variant='outline' onClick={() => onBack()}>Back</Button></div>}
                     {valid && <Button onClick={() => handleSubmit()} disabled={loading}>{loading ? <Spinner /> : <span className="flex gap-2 items-center">Join your workspace <ArrowRight /></span> }</Button>}
                 </div>
                 {error && <p className="text-red-500 text-sm italic mt-2 text-center">{error}</p>}

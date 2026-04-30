@@ -2,12 +2,14 @@ import { BreezSparkWallet, type Wallet } from '@/lib/wallet';
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import posthog from 'posthog-js';
+import type { Seed } from '@breeztech/breez-sdk-spark/web';
 
 export interface WalletContextType {
     storeWallet: (mnemonic: string) => Promise<Wallet>;
     wallet: Wallet | null;
     disconnect: () => void;
     walletExists: boolean;
+    connectWithSeed(seed: Seed): Promise<Wallet>;
 }
 
 export type Addresses = {
@@ -25,6 +27,16 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     // Store the instance ref so we never re-initialize if already connected
     const walletRef = useRef<Wallet | null>(null)
 
+    const connectWithSeed = async (seed: Seed | string) => {
+        const wallet = await BreezSparkWallet.initialize(
+            seed,
+            import.meta.env.VITE_BREEZ_API_KEY || ''
+        );
+        walletRef.current = wallet
+        setWallet(wallet);
+        return wallet
+    }
+
     const loadWallet = async () => {
         if (walletRef.current) {
             return walletRef.current
@@ -32,13 +44,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
         const mnemonic = localStorage.getItem('BITLASSO_MNEMONIC')
         if (mnemonic) {
-            const wallet = await BreezSparkWallet.initialize(
-                mnemonic,
-                import.meta.env.VITE_BREEZ_API_KEY || ''
-            );
-
-            walletRef.current = wallet
-            setWallet(wallet);
+            const wallet = await connectWithSeed(mnemonic)
             return wallet
         }
     }
@@ -75,7 +81,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     }
 
     return (
-        <WalletContext.Provider value={{ wallet, disconnect, walletExists, storeWallet }}>
+        <WalletContext.Provider value={{ wallet, disconnect, walletExists, storeWallet, connectWithSeed }}>
             {children}
         </WalletContext.Provider>
     )

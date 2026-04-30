@@ -1,23 +1,37 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { PassphraseForm } from "@/components/dashboard/passphrase-form";
 import { CreateWalletForm } from "@/components/dashboard/create-wallet-form";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { useWallet } from "@/hooks/use-wallet";
-import { ArrowRight } from "lucide-react";
 import { usePostHog } from "@posthog/react";
 
 import LogoPng from '../../public/logo.svg'
 import { fetchSettings, registerSettings } from "@/lib/nostr";
+import { Button } from "@/components/ui/button";
+import PasskeyPage from "@/components/auth/passkey";
+import { NostrRecoverPassphrase } from "@/components/auth/nostr-recover";
+import type { Seed } from "@breeztech/breez-sdk-spark/web";
+import type { NostrConnection } from "@/lib/nostr-connect";
 
 export const LoginPage = () => {
-    const { storeWallet } = useWallet()
+    const { storeWallet, connectWithSeed } = useWallet()
     const [showPassphraseForm, setShowPassphraseForm] = useState(false)
     const [showCreateWalletForm, setShowCreateWalletForm] = useState(false)
+    const [showRecoveryOptions, setShowRecoveryOptions] = useState(false)
+    const [showNostrRecover, setShowNostrRecover] = useState(false)
     const [loading, setLoading] = useState(false)
     const navigate = useNavigate()
     const posthog = usePostHog()
+    const [showPasskey, setShowPasskey] = useState(false)
+    
+    const location = useLocation()
+    const [showPasskeyOption, setShowPasskeyOption] = useState(false)
+
+    useEffect(() => {
+        setShowPasskeyOption(new URLSearchParams(location.search).has('passkey_test'))
+    }, [location])
 
     const handlePassphraseSubmit = async (mnemonic: string) => {
         setLoading(true)
@@ -26,7 +40,7 @@ export const LoginPage = () => {
         const wallet = await storeWallet(mnemonic)
         const sparkAddress = await wallet.getSparkAddress()
         posthog?.identify(sparkAddress)
-        void(() => posthog?.capture('wallet_connected'))()
+        void (() => posthog?.capture('wallet_connected'))()
 
         const settings = await fetchSettings(wallet)
         if (!settings) {
@@ -48,9 +62,65 @@ export const LoginPage = () => {
         posthog?.identify(sparkAddress)
         posthog?.capture('wallet_created')
 
+        const settings = await fetchSettings(wallet)
+        if (!settings) {
+            console.log('initializing wallet settings')
+            await registerSettings(wallet, {
+                sparkIdentityKey: await wallet.getIdentityPubkey()
+            })
+        }
+
         setLoading(false)
         navigate('/app/dashboard', { replace: true })
     }
+
+    const handlePasskeyConnect = async (seed: Seed) => {
+        setLoading(true)
+        try {
+            const wallet = await connectWithSeed(seed)
+            const sparkAddress = await wallet.getSparkAddress()
+            posthog?.identify(sparkAddress)
+            setLoading(false)
+            navigate('/app/dashboard', { replace: true })
+        } catch {
+            // Stay on passkey screen — sdk.error will be set by useBreezSdk
+        }
+    };
+
+    const handleNostrPassphraseRecovered = async (passphrase: string, nostrConnection: NostrConnection) => {
+        setLoading(true)
+        try {
+            console.log('Restoring wallet with recovered passphrase from Nostr...')
+            const wallet = await storeWallet(passphrase)
+            const sparkAddress = await wallet.getSparkAddress()
+            posthog?.identify(sparkAddress)
+            void (() => posthog?.capture('wallet_recovered_nostr'))()
+
+            const settings = await fetchSettings(wallet)
+            if (!settings) {
+                console.log('initializing wallet settings')
+                await registerSettings(wallet, {
+                    notification: {
+                        npub: nostrConnection.npub
+                    },
+                    sparkIdentityKey: await wallet.getIdentityPubkey()
+                })
+            }
+            else {
+                settings.notification = {
+                    npub: nostrConnection.npub
+                }
+                await registerSettings(wallet, settings)
+            }
+
+            localStorage.setItem('BITLASSO_SECURED_MNEMONIC', 'true')
+            setLoading(false)
+            navigate('/app/dashboard', { replace: true })
+        } catch (error) {
+            console.error('Error restoring wallet:', error)
+            setLoading(false)
+        }
+    };
 
     return (
         <div className="lg:grid lg:grid-cols-5 min-h-svh">
@@ -124,32 +194,56 @@ export const LoginPage = () => {
 
                     <Card className="w-full">
                         <CardContent>
-                            {!showPassphraseForm && !showCreateWalletForm && <div className="flex flex-col gap-10 p-5 lg:p-20 ">
+                            {!showPasskey && !showNostrRecover && !showPassphraseForm && !showCreateWalletForm && !showRecoveryOptions && <div className="flex flex-col gap-10 p-5 lg:p-20 ">
                                 <div className="flex flex-col items-center gap-10 text-center ">
                                     <h1 className="w-full font-serif text-4xl font-normal text-foreground">
                                         Welcome !
                                     </h1>
                                     <h2 className="w-full font-serif text-2xl lg:text-3xl font-normal text-foreground">Access your <span className="text-primary">workspace</span></h2>
                                 </div>
-                                {!showPassphraseForm && !showCreateWalletForm &&
-                                    <div className="flex flex-col lg:flex-row items-center justify-center gap-2">
-                                        <button className="justify-center flex items-center gap-2 w-full rounded-full bg-foreground px-8 py-4 text-[15px] font-medium text-background transition-all duration-300 hover:shadow-lg hover:shadow-foreground/10 hover:bg-primary hover:cursor-pointer"  onClick={() => setShowCreateWalletForm(true)}>
-                                            Create wallet
-                                            <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-                                        </button>
-                                        <button className="justify-center flex items-center gap-2 w-full rounded-full bg-none text-primary px-8 py-4 text-[15px] font-medium text-background transition-all duration-300 hover:shadow-lg hover:border-primary border-1 hover:bg-primary/10 hover:shadow-foreground/10 hover:cursor-pointer" onClick={() => setShowPassphraseForm(true)}>
-                                            Connect wallet
-                                            <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-                                        </button>
+                                <div className="flex justify-center">
+                                    <div className="flex flex-col gap-5 lg:w-1/2 ">
+                                        {showPasskeyOption && <Button onClick={() => setShowPasskey(true)}>Use Passkey</Button>}
+                                        <Button onClick={() => setShowNostrRecover(true)} variant='outline'>Connect with Nostr</Button>
+                                        <div className="flex gap-5 items-center">
+                                            <div className="h-1 border-b flex-1"></div>
+                                            <span className="text-xs text-foreground/50 ">or</span>
+                                            <div className="h-1 border-b flex-1"></div>
+                                        </div>
+                                        <Button variant="ghost" className="text-muted-foreground text-sm cursor-pointer" onClick={() => setShowRecoveryOptions(true)}>Use recovery phrase instead</Button>
                                     </div>
-                                }
+                                </div>
+                                <p className="text-xs px-6 text-slate-400 text-center">Non-custodial. Your keys stay with you.</p>
+                            </div>}
+                            {showPasskey && <PasskeyPage onWalletRestored={handlePasskeyConnect} onBack={() => setShowPasskey(false)} />}
+                            {showNostrRecover && (
+                                <NostrRecoverPassphrase
+                                    loading={loading}
+                                    onSuccess={handleNostrPassphraseRecovered}
+                                    onBack={() => setShowNostrRecover(false)}
+                                />
+                            )}
+                            {!showPasskey && !showNostrRecover && !showPassphraseForm && !showCreateWalletForm && showRecoveryOptions && <div className="flex flex-col gap-10 p-0 lg:p-20 ">
+                                <div className="flex flex-col items-center gap-10 text-center ">
+                                    <h1 className="w-full font-serif text-4xl font-normal text-foreground">
+                                        Welcome !
+                                    </h1>
+                                    <h2 className="w-full font-serif text-2xl lg:text-3xl font-normal text-foreground">Access your <span className="text-primary">workspace</span></h2>
+                                </div>
+                                <div className="flex justify-center">
+                                    <div className="flex flex-col gap-5 lg:w-1/2 ">
+                                        <Button onClick={() => setShowCreateWalletForm(true)}>Create wallet</Button>
+                                        <Button variant='outline' onClick={() => setShowPassphraseForm(true)}>Restore your wallet</Button>
+                                        <Button variant="ghost" className="text-muted-foreground text-sm cursor-pointer" onClick={() => setShowRecoveryOptions(false)}>Back</Button>
+                                    </div>
+                                </div>
                                 <p className="text-xs px-6 text-slate-400 text-center">Non-custodial. Your keys stay with you.</p>
                             </div>}
                             {showPassphraseForm &&
-                                <PassphraseForm onSubmit={handlePassphraseSubmit} onBack={() => setShowPassphraseForm(false)} loading={loading} />
+                                <PassphraseForm onSubmit={handlePassphraseSubmit} onBack={() => { setShowPassphraseForm(false); setShowRecoveryOptions(true); }} loading={loading} />
                             }
                             {showCreateWalletForm &&
-                                <CreateWalletForm onSubmit={handleCreateWalletSubmit} onBack={() => setShowCreateWalletForm(false)} loading={loading} />
+                                <CreateWalletForm onSubmit={handleCreateWalletSubmit} onBack={() => { setShowCreateWalletForm(false); setShowRecoveryOptions(true); }} loading={loading} />
                             }
                         </CardContent>
                     </Card>

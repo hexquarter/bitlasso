@@ -1,32 +1,26 @@
 import { useEffect, useState } from "react"
 import { usePostHog } from "@posthog/react"
 
-import { fetchSettings, registerSettings, type NotificationSettings, type OrgSettings, type UserSettings } from "@/lib/nostr"
+import { fetchEncryptedPassphrase, fetchSettings, registerSettings, storeEncryptedPassphrase, type NotificationSettings, type OrgSettings, type UserSettings } from "@/lib/nostr"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { IconNotification } from "@tabler/icons-react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
-import { AlertTriangleIcon, Copy, Eye, SaveAll, Terminal, Zap } from "lucide-react"
+import { AlertTriangleIcon, CheckCircle2, Copy, Eye, SaveAll, Shield, Terminal, Zap } from "lucide-react"
 import { useWallet } from "@/hooks/use-wallet"
 import { toast } from "sonner"
 import { Spinner } from "@/components/ui/spinner"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import type { WindowNostr } from 'nostr-tools/nip07'
-import { hexToBytes } from "nostr-tools/utils"
-import { bech32 } from "bech32"
 import { getApiUrl } from "@/lib/api"
 import { CgOrganisation } from "react-icons/cg";
+import { connectViaExtension, encryptPassphrase, isNostrExtensionAvailable } from "@/lib/nostr-connect"
 
-declare global {
-    interface Window {
-        nostr?: WindowNostr
-    }
-}
-const hasNostr = () => typeof window !== 'undefined' && !!window.nostr
 
 export const SettingsPage = () => {
+    const nostrExtension = isNostrExtensionAvailable()
+
     const { wallet } = useWallet()
     const posthog = usePostHog()
     const [initializing, setInitializing] = useState(true)
@@ -38,6 +32,8 @@ export const SettingsPage = () => {
 
     const [orgSettings, setOrgSettings] = useState<OrgSettings>({ name: '', vat: 0.0, registrationNumber: '' })
     const [orgSettingSaveLoading, setOrgSettingsSaveLoading] = useState(false)
+    const [nostrBackup, setNostrBackup] = useState<undefined | boolean>(undefined)
+    const [nostrBackupLoading, setNostrBackupLoading] = useState(false)
 
     useEffect(() => {
         if (!wallet) return
@@ -79,11 +75,22 @@ export const SettingsPage = () => {
 
             setInitializing(false)
 
+            if (nostrExtension) {
+                const nostrConnection = await connectViaExtension()
+                if (nostrConnection.pubkey !== wallet.nostrConnection.pubkey) {
+                    setNostrBackup(undefined)
+                }
+                else {
+                    const encryptedPassphrase = await fetchEncryptedPassphrase(nostrConnection.pubkey)
+                    setNostrBackup(encryptedPassphrase !== undefined)
+                }
+            }
+
             if (wallet) {
                 setSnippet(`curl -X POST ${getApiUrl('/payment-request')} \\
   -H "Content-Type: application/json" \\
   -d     '{
-    "pubkey": "${wallet?.getNostrPublicKey()}", 
+    "pubkey": "${wallet?.nostrConnection.pubkey}", 
     "amount": 1000,
     "description": "Payment for services"
   }'`)
@@ -156,14 +163,38 @@ export const SettingsPage = () => {
     }
 
     const signNostrConnect = async () => {
-        const pubkey = await window.nostr?.getPublicKey() as string
-        const pkBytes = hexToBytes(pubkey);
-        const npub = bech32.encode('npub', bech32.toWords(pkBytes))
-
-        setNotificationSettings((prev: NotificationSettings) => ({ ...prev, npub }))
+        const connection = await connectViaExtension()
+        setNotificationSettings((prev: NotificationSettings) => ({ ...prev, npub: connection.npub }))
     }
 
-    const nostrExtension = hasNostr()
+    const handleSecureWithNostr = async () => {
+        try {
+            setNostrBackupLoading(true)
+            const connection = await connectViaExtension()
+            const passphrase = localStorage.getItem('BITLASSO_MNEMONIC')
+            if (!passphrase) {
+                return
+            }
+
+            const encryptedPassphrase = await encryptPassphrase(passphrase, connection)
+            await storeEncryptedPassphrase(connection, encryptedPassphrase)
+
+            setTimeout(() => {
+                setNostrBackupLoading(false)
+                setNostrBackup(true)
+                confirmSecuredMnemonic()
+                const toastId = toast.success('Your passphrase has been secured with your Nostr identity')
+                setTimeout(() => {
+                    toast.dismiss(toastId)
+                }, 2000)
+            }, 1000)
+        }
+        catch (error) {
+            setNostrBackupLoading(false)
+            console.error('Failed to secure passphrase with Nostr', error)
+            toast.error(`Failed to secure your passphrase with Nostr`)
+        }
+    }
 
     return (
         <div className="flex flex-1 flex-col h-full w-full">
@@ -174,7 +205,7 @@ export const SettingsPage = () => {
                             <h1 className="text-4xl font-serif font-normal text-foreground flex items-center gap-2">Settings {initializing && <Spinner className="text-primary" />}</h1>
                             <h2 className="text-1xl font-light text-muted-foreground">Configure your workspace.</h2>
                         </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-10">
+                        <div className="lg:grid xl:grid-cols-3 2xl:grid-cols-4 lg:gap-10 gap-5 flex flex-col">
                             <Card className="">
                                 <CardHeader className="text-gray-500 text-xs flex justify-between items-center">
                                     <div className="flex items-center gap-2">
@@ -183,7 +214,7 @@ export const SettingsPage = () => {
                                     </div>
                                 </CardHeader>
                                 <CardContent className="flex flex-col gap-5">
-                                    {hasSecuredMnemonic == 'true' && <Alert className="bg-primary/10 border-1 border-primary/20">
+                                    {hasSecuredMnemonic != 'true' && <Alert className="bg-primary/10 border-1 border-primary/20">
                                         <AlertTriangleIcon />
                                         <AlertTitle>Secure your wallet</AlertTitle>
                                         <AlertDescription className="flex flex-col gap-2">
@@ -193,14 +224,31 @@ export const SettingsPage = () => {
                                         </AlertDescription>
                                     </Alert>
                                     }
-                                    <div className="flex justify-between">
-                                        {mnemonic.length == 0 && <Button variant='outline' className={`text-sm gap-2 justify-start lg:p-6 group ${nostrExtension ? 'flex-1' : ''}`} onClick={handleRevealSecret}>
-                                            <div className="flex items-center gap-2">
-                                                <Eye />
-                                                <p className="flex items-center gap-2">Reveal passphrase</p>
+                                    {!initializing && nostrBackup === true &&
+                                        <div>
+                                            <p className="text-sm flex items-center gap-2 text-green-800 bg-green-100/50 border border-green-200 p-2 rounded-md">
+                                                <CheckCircle2 />Your passphrase is backed up with your Nostr identity.
+                                            </p>
+                                        </div>}
+                                    {!initializing && nostrExtension && nostrBackup === false &&
+                                        <div className="flex flex-col gap-5">
+                                            <div className="flex flex-col gap-1">
+                                                <p className="text-sm text-muted-foreground">You can backup your passphrase with your Nostr identity to avoid losing it.</p>
+                                                <div>
+                                                    <Button className="text-sm gap-2 px-4" onClick={() => handleSecureWithNostr()}>
+                                                        {nostrBackupLoading ? <Spinner /> : <span className="flex items-center gap-2"><Shield />Secure your passphrase with Nostr</span>}
+                                                    </Button>
+                                                </div>
                                             </div>
-                                        </Button>}
-                                    </div>
+                                            <hr />
+                                        </div>
+                                    }
+                                    {mnemonic.length == 0 && <Button variant="outline" className={`w-full text-sm gap-2 justify-start group px-4`} onClick={handleRevealSecret}>
+                                        <div className="flex items-center gap-2">
+                                            <Eye />
+                                            <p className="flex items-center gap-2">Reveal passphrase for export</p>
+                                        </div>
+                                    </Button>}
                                     {mnemonic.length > 0 &&
                                         <div className="flex flex-col gap-5">
                                             <div className="grid grid-cols-3 gap-4 text-center">
@@ -211,7 +259,7 @@ export const SettingsPage = () => {
                                             <div className='flex text-sm text-gray-600 gap-2 justify-end' onClick={() => copy()}>
                                                 <Copy className="w-5" />
                                             </div>
-                                            {hasSecuredMnemonic == 'false' && <Button className="text-sm" onClick={confirmSecuredMnemonic}>I confirm my wallet have been securely exported</Button>}
+                                            {hasSecuredMnemonic == 'false' && <Button className="text-sm" onClick={confirmSecuredMnemonic}>Secured!</Button>}
                                         </div>
                                     }
                                 </CardContent>
@@ -332,25 +380,28 @@ export const SettingsPage = () => {
                                                     placeholder="webhook..."
                                                     onChange={(e) => setNotificationSettings({ ...notificationSettings, webhook: e.target.value })} />
                                             </div>
-                                            <div className="flex gap-2 lg:flex-row flex-col">
-                                                <Button
-                                                    className={`text-sm gap-2 justify-start group px-4 ${nostrExtension ? 'w-1/2' : ''}`}
-                                                    variant='default'
-                                                    onClick={handleSaveNotifSettings} disabled={saveNotifLoading}>
-                                                    <div className="flex gap-2 justify-center items-center">
-                                                        <SaveAll />
-                                                        <p className="flex items-center gap-2">Save {saveNotifLoading && <Spinner />}</p>
-                                                    </div>
-                                                </Button>
-                                                {nostrExtension && <Button
-                                                    className="text-sm flex justify-start gap-2 w-1/2 flex flex-row group px-4"
+                                            <div className="flex gap-2 2xl:flex-row flex-col justify-between">
+                                                {nostrExtension && (notificationSettings.npub == undefined || notificationSettings.npub === '') && <Button
+                                                    className="text-sm flex flex-1 justify-start gap-2 flex-row group px-4"
                                                     variant='outline'
                                                     onClick={signNostrConnect} >
                                                     <div className="flex gap-2 items-center">
                                                         <Zap />
-                                                        <p>Fill with Nostr ext.</p>
+                                                        <p>Fill with Nostr extension (Alby, nos2x, etc.)</p>
                                                     </div>
                                                 </Button>}
+                                                <div className="">
+                                                    <Button
+                                                        className={`text-sm gap-2 justify-start group px-4 w-full`}
+                                                        variant='default'
+                                                        onClick={handleSaveNotifSettings} disabled={saveNotifLoading}>
+                                                        <div className="flex gap-2 justify-center items-center">
+                                                            <SaveAll />
+                                                            <p className="flex items-center gap-2">Save {saveNotifLoading && <Spinner />}</p>
+                                                        </div>
+                                                    </Button>
+                                                </div>
+
                                             </div>
                                         </>
                                     }

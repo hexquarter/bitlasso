@@ -1,11 +1,8 @@
-import { SimplePool, getPublicKey, type Filter, type Event, type NostrEvent } from "nostr-tools"
+import { SimplePool, type Filter, type Event, type NostrEvent } from "nostr-tools"
 
-import { HDKey } from "@scure/bip32";
-import { bech32 } from "bech32";
-import { bytesToHex, hexToBytes } from "nostr-tools/utils";
-import { mnemonicToSeedSync } from "@scure/bip39";
 import type { Wallet } from "./wallet";
 import type { Receipt } from "@/components/dashboard/receipt-table";
+import type { NostrConnection } from "./nostr-connect";
 
 const pool = new SimplePool({
     enablePing: true,
@@ -19,33 +16,6 @@ const BACKUP_RELAIS = [
     "wss://nos.lol"
 ];
 const RELAYS = [BACKEND_RELAY, ...BACKUP_RELAIS]
-
-export type NostrKeyPair = {
-    pub: string
-    priv: string
-    npub: string
-    nsec: string
-}
-
-export const getNostrKeyPair = (mnemonic: string): NostrKeyPair => {
-    const seed = mnemonicToSeedSync(mnemonic)
-    const hdkey = HDKey.fromMasterSeed(seed);
-    const privateKey = hdkey.derive("m/44'/1237'/0'/0/0").privateKey;
-    if (!privateKey) {
-        throw new Error('Cannot derive Nostr private key')
-    }
-    const publicKey = getPublicKey(privateKey)
-    const pkBytes = hexToBytes(publicKey);
-
-    const nsec = bech32.encode('nsec', bech32.toWords(privateKey));
-    const npub = bech32.encode('npub', bech32.toWords(pkBytes));
-    return {
-        pub: publicKey,
-        priv: bytesToHex(privateKey),
-        nsec: nsec,
-        npub: npub
-    }
-}
 
 const fetchRelayEvents = async (relay: string, filter: Filter) => {
     try {
@@ -156,7 +126,7 @@ export type UserSettings = {
 export const fetchSettings = async (wallet: Wallet): Promise<UserSettings | undefined> => {
     const events = await fetchAndSync({
         kinds: [30078],
-        authors: [wallet.getNostrPublicKey()],
+        authors: [wallet.nostrConnection.pubkey],
         "#d": ["bitlasso/settings"]
     });
     if (events.length > 0) {
@@ -183,12 +153,12 @@ export const registerOrganizationSettings = async (wallet: Wallet, orgSettings: 
     const event = {
         kind: 30078,
         content: JSON.stringify(orgSettings),
-        pubkey: wallet.getNostrPublicKey(),
+        pubkey: wallet.nostrConnection.pubkey,
         created_at: Math.floor(Date.now() / 1000),
         tags: [["d", "bitlasso/org_settings"]],
     }
 
-    const signedEvent = wallet.signNostrEvent(event);
+    const signedEvent = await wallet.nostrConnection.sign(event);
     await Promise.any(pool.publish(RELAYS, signedEvent))
     return signedEvent.id
 }
@@ -197,12 +167,12 @@ export const registerSettings = async (wallet: Wallet, settings: UserSettings) =
     const event = {
         kind: 30078,
         content: JSON.stringify(settings),
-        pubkey: wallet.getNostrPublicKey(),
+        pubkey: wallet.nostrConnection.pubkey,
         created_at: Math.floor(Date.now() / 1000),
         tags: [["d", "bitlasso/settings"]],
     }
 
-    const signedEvent = wallet.signNostrEvent(event);
+    const signedEvent = await wallet.nostrConnection.sign(event);
     await Promise.any(pool.publish(RELAYS, signedEvent))
     return signedEvent.id
 }
@@ -211,7 +181,7 @@ export const fetchPaymentsRequest = async (wallet: Wallet): Promise<PaymentReque
     const events = await fetchAndSync({
         kinds: [30078],
         "#t": ["bitlasso/req"],
-        "#p": [wallet.getNostrPublicKey()]
+        "#p": [wallet.nostrConnection.pubkey]
     });
 
     if (events.length == 0) return []
@@ -334,7 +304,7 @@ export const publishReceiptMetadata = async (wallet: Wallet, transactionId: stri
             recipient,
             transactionId
         }),
-        pubkey: wallet.getNostrPublicKey(),
+        pubkey: wallet.nostrConnection.pubkey,
         created_at: Math.floor(createdAt.getTime() / 1000),
         tags: [
             ["d", `bitlasso/receipt/${transactionId}`],
@@ -346,7 +316,7 @@ export const publishReceiptMetadata = async (wallet: Wallet, transactionId: stri
         event.tags.push(["e", paymentId, "", "payment-request"])
     }
 
-    const signedEvent = wallet.signNostrEvent(event);
+    const signedEvent = await wallet.nostrConnection.sign(event);
     await Promise.any(pool.publish(RELAYS, signedEvent))
     return signedEvent.id
 }
@@ -354,7 +324,7 @@ export const publishReceiptMetadata = async (wallet: Wallet, transactionId: stri
 export const listReceipts = async (wallet: Wallet): Promise<Receipt[]> => {
     const events = await pool.querySync(RELAYS, {
         kinds: [30078],
-        authors: [wallet.getNostrPublicKey()],
+        authors: [wallet.nostrConnection.pubkey],
         "#t": ["bitlasso/receipt"]
     });
     if (events.length == 0) {
@@ -416,4 +386,43 @@ export const subscribePayment = (requestId: string, callback: (transaction: stri
         const { settlementMode, transaction } = JSON.parse(evt.content)
         callback(transaction, settlementMode)
     })
+}
+
+export const fetchEncryptedPassphrase = async (pubkey: string): Promise<string | undefined> => {
+    try {
+        const events = await fetchAndSync({
+            kinds: [30078],
+            authors: [pubkey],
+            "#d": ["bitlasso/recover"]
+        });
+        if (events.length > 0) {
+            const { content } = events[0]
+            const data = JSON.parse(content)
+            return data.encryptedPassphrase
+        }
+        return undefined
+    } catch (error) {
+        console.error('Error fetching encrypted passphrase:', error)
+        return undefined
+    }
+}
+
+export const storeEncryptedPassphrase = async (
+    nostrConnection: NostrConnection,
+    encryptedPassphrase: string
+): Promise<string> => {
+    const event = {
+        kind: 30078,
+        content: JSON.stringify({
+            encryptedPassphrase,
+            timestamp: Date.now()
+        }),
+        pubkey: nostrConnection.pubkey,
+        created_at: Math.floor(Date.now() / 1000),
+        tags: [["d", "bitlasso/recover"]],
+    }
+
+    const signedEvent = await nostrConnection.sign(event);
+    await Promise.any(pool.publish(RELAYS, signedEvent))
+    return signedEvent.id
 }

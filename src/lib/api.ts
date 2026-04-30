@@ -147,7 +147,7 @@ export const publishPaymentRequest = async (settings: Settings, wallet: Wallet, 
             discountRate
         }
 
-        const authToken = await nip98.getToken(getApiUrl(`/payment-request`), 'POST', (e) => wallet.signNostrEvent(e), true, paymentRequest)
+        const authToken = await nip98.getToken(getApiUrl(`/payment-request`), 'POST', async (e) => wallet.nostrConnection.sign(e), true, paymentRequest)
 
         let response = await fetch(getApiUrl(`/payment-request`), {
             method: 'POST',

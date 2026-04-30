@@ -75,15 +75,18 @@ export const LoginPage = () => {
     }
 
     const handlePasskeyConnect = async (seed: Seed) => {
+        console.log('authenticating user with passkey...')
         setLoading(true)
         try {
             const wallet = await connectWithSeed(seed)
+            console.log('passkey authentication successful, wallet connected')
             const sparkAddress = await wallet.getSparkAddress()
             posthog?.identify(sparkAddress)
             setLoading(false)
             navigate('/app/dashboard', { replace: true })
-        } catch {
-            // Stay on passkey screen — sdk.error will be set by useBreezSdk
+        } catch(e) {
+            console.error('Passkey authentication failed:', e)
+            setLoading(false)
         }
     };
 

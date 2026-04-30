@@ -194,6 +194,17 @@ const PasskeyPage: React.FC<PasskeyPageProps> = ({
     // Render helpers
     // ============================================
 
+    const renderDetecting = () => (
+        <>
+            <div className="flex flex-col gap-10">
+                <h1 className="w-full font-serif text-4xl font-normal text-primary">Creating <span className="text-foreground">passkey.</span></h1>
+                <p className="text-muted-foreground">Detecting passkey...</p>
+            </div>
+
+            <Spinner />
+        </>
+    );
+
     const renderReview = () => (
         <>
             <div className="flex flex-col gap-10">
@@ -227,7 +238,7 @@ const PasskeyPage: React.FC<PasskeyPageProps> = ({
         </>
     );
 
-     const renderConnecting = () => (
+    const renderConnecting = () => (
         <>
             <div className="flex flex-col gap-10">
                 <h1 className="w-full font-serif text-4xl font-normal text-primary">Connecting <span className="text-foreground">passkey.</span></h1>
@@ -237,19 +248,13 @@ const PasskeyPage: React.FC<PasskeyPageProps> = ({
         </>
     );
 
-    const renderSpinner = (text?: string) => (
-        <div className="flex flex-col items-center justify-center py-16">
-            <Spinner /> {text}
-        </div>
-    );
-
     // ============================================
     // Content & footer routing
     // ============================================
 
     const content = (() => {
         switch (phase) {
-            case 'detecting': return renderSpinner('Detecting passkey...');
+            case 'detecting': return renderDetecting();
             case 'review': return renderReview();
             case 'creating': return error ? renderReview() : renderCreating();
             case 'new-storing':
@@ -293,6 +298,7 @@ const PasskeyPage: React.FC<PasskeyPageProps> = ({
         <div className="max-w-xl mx-auto w-full flex flex-col min-h-full gap-5">
             <div className="mt-6 space-y-4 flex flex-col flex-1">
                 <div className='flex gap-2'>
+                    <div className={`rounded-full w-2 h-2 bg-gray-200/50 ${phase === 'detecting' ? 'bg-primary animate-pulse' : ''}`}></div>
                     <div className={`rounded-full w-2 h-2 bg-gray-200/50 ${phase === 'review' ? 'bg-primary animate-pulse' : ''}`}></div>
                     <div className={`rounded-full w-2 h-2 bg-gray-200/50 ${phase === 'creating' || phase === 'new-storing' ? 'bg-primary animate-pulse' : ''}`}></div>
                     <div className={`rounded-full w-2 h-2 bg-gray-200/50 ${phase === 'connecting' ? 'bg-primary animate-pulse' : ''}`}></div>

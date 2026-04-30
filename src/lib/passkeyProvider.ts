@@ -22,7 +22,7 @@ export interface WebAuthnConfig {
 }
 
 const defaultConfig: WebAuthnConfig = {
-  rpName: import.meta.env.DEV ? 'localhost' : 'Bitlasso',
+  rpName: 'https://bitlasso.xyz',
   rpId: 'keys.breez.technology',
 };
 

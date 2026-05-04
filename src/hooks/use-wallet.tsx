@@ -23,7 +23,9 @@ const WalletContext = createContext<WalletContextType | undefined>(undefined);
 
 export function WalletProvider({ children }: { children: ReactNode }) {
     const [wallet, setWallet] = useState<Wallet | null>(null);
-    const [walletExists, setWalletExists] = useState(localStorage.getItem('BITLASSO_MNEMONIC') != null ? true : false)
+    const [walletExists, setWalletExists] = useState(() => {
+        return !!localStorage.getItem('BITLASSO_MNEMONIC') || isPasskeyMode();
+    })
 
     // Store the instance ref so we never re-initialize if already connected
     const walletRef = useRef<Wallet | null>(null)

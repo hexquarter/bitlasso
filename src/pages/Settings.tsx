@@ -30,6 +30,7 @@ export const SettingsPage = () => {
     const [saveNotifLoading, setSaveNotifLoading] = useState(false)
     const [hasSecuredMnemonic, setHashSecureMnemonic] = useState(localStorage.getItem('BITLASSO_SECURED_MNEMONIC') || 'false')
     const [snippet, setSnippet] = useState('')
+    const [jsSnippet, setJsSnippet] = useState('')
 
     const [orgSettings, setOrgSettings] = useState<OrgSettings>({ name: '', vat: 0.0, registrationNumber: '' })
     const [orgSettingSaveLoading, setOrgSettingsSaveLoading] = useState(false)
@@ -89,11 +90,71 @@ export const SettingsPage = () => {
 
             setSnippet(`curl -X POST ${getApiUrl('/payment-request')} \\
   -H "Content-Type: application/json" \\
-  -d     '{
-    "pubkey": "${wallet.nostrConnection.pubkey}", 
+  -H "Authorization: <NIP-98-AUTH-TOKEN>" \\
+  -d '{
     "amount": 1000,
     "description": "Payment for services"
   }'`)
+
+            setJsSnippet(`import { nip98 } from 'nostr-tools'
+
+// Your payment request data
+const paymentRequest = {
+  amount: 1000,
+  description: "Payment for services"
+}
+
+// Generate NIP-98 auth token
+const authToken = await nip98.getToken(
+  '${getApiUrl('/payment-request')}', 
+  'POST', 
+  async (event) => {
+    // Sign the event with your Nostr private key
+    return await signEvent(event)
+  }, 
+  true, // include body hash
+  paymentRequest
+)
+
+// Make the authenticated request
+let response = await fetch('${getApiUrl('/payment-request')}', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': authToken
+  },
+  body: JSON.stringify(paymentRequest)
+})
+
+// Handle L402 payment required (402 status)
+if (response.status === 402) {
+  const authHeader = response.headers.get('WWW-Authenticate')
+  if (authHeader) {
+    // Parse macaroon and invoice from auth header
+    const macaroonMatch = authHeader.match(/macaroon="([^"]+)"/)
+    const invoiceMatch = authHeader.match(/invoice="([^"]+)"/)
+    
+    if (macaroonMatch && invoiceMatch) {
+      const macaroon = macaroonMatch[1]
+      const invoice = invoiceMatch[1]
+      
+      // Pay the Lightning invoice (implement payLightningInvoice)
+      const preimage = await payLightningInvoice(invoice)
+      
+      // Retry with macaroon
+      response = await fetch('${getApiUrl('/payment-request')}', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'L402 ' + macaroon + ':' + preimage
+        },
+        body: JSON.stringify(paymentRequest)
+      })
+    }
+  }
+}
+
+const result = await response.json()`)
         }
 
         fetchData()
@@ -457,25 +518,54 @@ export const SettingsPage = () => {
                                         </>
                                     }
                                     {!initializing &&
-                                        <div className="flex flex-col gap-2 mt-4">
-                                            <Label className="text-xs text-muted-foreground font-mono">Snippet to create payment requests programmatically</Label>
-                                            <div className="relative group">
-                                                <pre className="p-3 rounded-md bg-zinc-950 text-zinc-300 text-[10px] overflow-x-auto font-mono border border-zinc-800">
-                                                    {snippet}
-                                                </pre>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    className="absolute border text-white top-2 right-2  h-6 w-6 p-4"
-                                                    onClick={() => {
-                                                        navigator.clipboard.writeText(snippet)
-                                                        toast.success('CURL snippet copied')
-                                                    }}
-                                                >
-                                                    <Copy className="h-3 w-2" />
-                                                </Button>
+                                        <>
+                                            <div className="flex flex-col gap-2">
+                                                <Label className="text-xs text-muted-foreground font-mono">Create payment request programmatically</Label>
+                                                <p className="text-sm text-muted-foreground">
+                                                    Our API uses <a href="https://github.com/nostr-protocol/nips/blob/master/98.md" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">NIP-98</a> authentication
+                                                    and <a href="https://github.com/lightning/blips/blob/master/blip-0010.md" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">L402</a> payment protocol.
+                                                    All requests must be signed with your Nostr private key, and API calls may incur a small fee of $1 or be paid using your Spark token credits.
+                                                </p>
                                             </div>
-                                        </div>
+                                            <div className="flex flex-col gap-2">
+                                                <Label className="text-xs text-muted-foreground font-mono">JavaScript example to create payment requests</Label>
+                                                <div className="relative group">
+                                                    <pre className="p-3 rounded-md bg-zinc-950 text-zinc-300 text-[10px] overflow-x-auto font-mono border border-zinc-800">
+                                                        {jsSnippet}
+                                                    </pre>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="absolute border text-white top-2 right-2 h-6 w-6 p-4"
+                                                        onClick={() => {
+                                                            navigator.clipboard.writeText(jsSnippet)
+                                                            toast.success('JavaScript snippet copied')
+                                                        }}
+                                                    >
+                                                        <Copy className="h-3 w-2" />
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                            <div className="flex flex-col gap-2">
+                                                <Label className="text-xs text-muted-foreground font-mono">CURL example (requires pre-generated auth token)</Label>
+                                                <div className="relative group">
+                                                    <pre className="p-3 rounded-md bg-zinc-950 text-zinc-300 text-[10px] overflow-x-auto font-mono border border-zinc-800">
+                                                        {snippet}
+                                                    </pre>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="absolute border text-white top-2 right-2  h-6 w-6 p-4"
+                                                        onClick={() => {
+                                                            navigator.clipboard.writeText(snippet)
+                                                            toast.success('CURL snippet copied')
+                                                        }}
+                                                    >
+                                                        <Copy className="h-3 w-2" />
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        </>
                                     }
                                 </CardContent>
                             </Card>

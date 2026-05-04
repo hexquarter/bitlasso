@@ -183,12 +183,34 @@ export const SettingsPage = () => {
         try {
             setNostrBackupLoading(true)
             const connection = await connectViaExtension()
-            const passphrase = localStorage.getItem('BITLASSO_MNEMONIC')
+
+            let passphrase: string | null = null
+
+            if (isPasskeyMode()) {
+                try {
+                    const wallet = await getWallet()
+                    if (wallet.seed.type == 'mnemonic') {
+                        passphrase = wallet.seed.mnemonic
+                    }
+                }
+                catch (error) {
+                    console.error('Failed to retrieve passkey wallet', error)
+                    toast.error('Failed to retrieve passkey wallet')
+                    setNostrBackupLoading(false)
+                    return
+                }
+            }
+            else {
+                passphrase = localStorage.getItem('BITLASSO_MNEMONIC')
+            }
+
             if (!passphrase) {
+                toast.error('Failed to retrieve mnemonic')
+                setNostrBackupLoading(false)
                 return
             }
 
-            const encryptedPassphrase = await encryptPassphrase(passphrase, connection)
+            const encryptedPassphrase = encryptPassphrase(passphrase, connection)
             await storeEncryptedPassphrase(connection, encryptedPassphrase)
 
             setTimeout(() => {

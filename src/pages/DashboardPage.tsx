@@ -162,7 +162,7 @@ export const DashboardPage = () => {
     const currency = localStorage.getItem('BITLASSO_CURRENCY') || 'USD'
 
     const updateBalance = async (wallet: Wallet) => {
-        const balance = await wallet.getBalance(true)
+        const balance = await wallet.getBalance()
         setSatsBalance(balance.balance)
         setTokenBalances(balance.tokenBalances)
     }

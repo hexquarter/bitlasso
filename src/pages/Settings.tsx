@@ -250,7 +250,7 @@ export const SettingsPage = () => {
                                             <div className="flex flex-col gap-1">
                                                 <p className="text-sm text-muted-foreground">You can backup your passphrase with your Nostr identity to avoid losing it.</p>
                                                 <div>
-                                                    <Button className="text-sm gap-2 px-4" onClick={() => handleSecureWithNostr()}>
+                                                    <Button className="text-sm gap-2 px-4 w-full" onClick={() => handleSecureWithNostr()}>
                                                         {nostrBackupLoading ? <Spinner /> : <span className="flex items-center gap-2"><Shield />Secure your passphrase with Nostr</span>}
                                                     </Button>
                                                 </div>

@@ -173,6 +173,7 @@ export const SettingsPage = () => {
     const confirmSecuredMnemonic = () => {
         localStorage.setItem('BITLASSO_SECURED_MNEMONIC', 'true')
         setHashSecureMnemonic('true')
+        setMnemonic([])
     }
 
     const signNostrConnect = async () => {

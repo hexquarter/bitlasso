@@ -1,9 +1,9 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { PassphraseForm } from "@/components/dashboard/passphrase-form";
 import { CreateWalletForm } from "@/components/dashboard/create-wallet-form";
-import { useLocation, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 import { useWallet } from "@/hooks/use-wallet";
 import { usePostHog } from "@posthog/react";
 
@@ -26,13 +26,6 @@ export const LoginPage = () => {
     const posthog = usePostHog()
     const [showPasskey, setShowPasskey] = useState(false)
     
-    const location = useLocation()
-    const [showPasskeyOption, setShowPasskeyOption] = useState(false)
-
-    useEffect(() => {
-        setShowPasskeyOption(new URLSearchParams(location.search).has('passkey_test'))
-    }, [location])
-
     const handlePassphraseSubmit = async (mnemonic: string) => {
         setLoading(true)
         console.log('authenticating user...')
@@ -206,7 +199,7 @@ export const LoginPage = () => {
                                 </div>
                                 <div className="flex justify-center">
                                     <div className="flex flex-col gap-5 lg:w-1/2 ">
-                                        {showPasskeyOption && <Button onClick={() => setShowPasskey(true)}>Use Passkey</Button>}
+                                        <Button onClick={() => setShowPasskey(true)}>Use Passkey</Button>
                                         <Button onClick={() => setShowNostrRecover(true)} variant='outline'>Connect with Nostr</Button>
                                         <div className="flex gap-5 items-center">
                                             <div className="h-1 border-b flex-1"></div>

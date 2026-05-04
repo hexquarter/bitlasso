@@ -56,4 +56,9 @@ Four steps. One continuous loop.
 
 ## License
 
-BitLasso is a product of HexQuarter.
+BitLasso is a product of [HexQuarter](https://hexquarter.com).
+
+The frontend source code is open source under the [MIT License](./LICENSE).  
+The backend, APIs, and hosted infrastructure are proprietary and all rights are reserved by HexQuarter.
+
+The BitLasso name and logo are trademarks of HexQuarter. See [TRADEMARK.md](./TRADEMARK.md) for usage terms.

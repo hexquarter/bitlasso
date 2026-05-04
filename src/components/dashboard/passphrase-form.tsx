@@ -75,7 +75,6 @@ export const PassphraseForm: React.FC<Props> = ({ onSubmit, onBack, loading = fa
     }
 
     const handleSubmit = () => {
-        localStorage.setItem('BITLASSO_SECURED_MNEMONIC', 'true')
         onSubmit(mnemonic.join(' '))
     }
 

@@ -25,10 +25,11 @@ export const LoginPage = () => {
     const navigate = useNavigate()
     const posthog = usePostHog()
     const [showPasskey, setShowPasskey] = useState(false)
-    
+
     const handlePassphraseSubmit = async (mnemonic: string) => {
         setLoading(true)
         console.log('authenticating user...')
+        localStorage.setItem('BITLASSO_SECURED_MNEMONIC', 'true')
 
         const wallet = await storeWallet(mnemonic)
         const sparkAddress = await wallet.getSparkAddress()
@@ -68,8 +69,9 @@ export const LoginPage = () => {
     }
 
     const handlePasskeyConnect = async (seed: Seed) => {
-        console.log('authenticating user with passkey...')
         setLoading(true)
+        console.log('authenticating user with passkey...')
+        localStorage.setItem('BITLASSO_SECURED_MNEMONIC', 'true')
         try {
             const wallet = await connectWithSeed(seed)
             console.log('passkey authentication successful, wallet connected')
@@ -77,7 +79,7 @@ export const LoginPage = () => {
             posthog?.identify(sparkAddress)
             setLoading(false)
             navigate('/app/dashboard', { replace: true })
-        } catch(e) {
+        } catch (e) {
             console.error('Passkey authentication failed:', e)
             setLoading(false)
         }
@@ -85,6 +87,7 @@ export const LoginPage = () => {
 
     const handleNostrPassphraseRecovered = async (passphrase: string, nostrConnection: NostrConnection) => {
         setLoading(true)
+        localStorage.setItem('BITLASSO_SECURED_MNEMONIC', 'true')
         try {
             console.log('Restoring wallet with recovered passphrase from Nostr...')
             const wallet = await storeWallet(passphrase)
@@ -109,7 +112,6 @@ export const LoginPage = () => {
                 await registerSettings(wallet, settings)
             }
 
-            localStorage.setItem('BITLASSO_SECURED_MNEMONIC', 'true')
             setLoading(false)
             navigate('/app/dashboard', { replace: true })
         } catch (error) {

@@ -32,9 +32,9 @@ export const Receive: React.FC<Props> = ({ addresses }) => {
 
     return (
         <Dialog open={open} onOpenChange={handleOpen}>
-            <DialogTrigger asChild onClick={() => setOpen(true)} >
+            <DialogTrigger asChild onClick={() => setOpen(true)} className="cursor-pointer">
                 <div className="flex flex-col items-center gap-2">
-                    <div className="rounded-full ring-1 ring-border p-3 text-primary hover:ring-primary hover:cursor-pointer hover:bg-primary/10">
+                    <div className="rounded-full ring-1 ring-border p-3 text-primary hover:ring-primary hover:bg-primary/10">
                         <ArrowDown className="h-4 w-4" />
                     </div>
                     <span className="text-sm text-muted-foreground">Receive</span>

@@ -137,14 +137,17 @@ export function ProblemSection() {
                 {differentiators.map((item, i) => (
                   <div
                     key={item.title}
-                    className={`group relative overflow-hidden rounded-2xl border border-primary/20 bg-primary/[0.025] p-8 transition-all duration-700 hover:border-primary/20 hover:shadow-lg md:p-10 ${isInView ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"}`}
-                    style={{ transitionDelay: isInView ? `${800 + i * 120}ms` : "0ms" }}
+                    className={`group relative overflow-hidden rounded-2xl border bg-whitge shadow-lg p-8 transition-all duration-400  md:p-10 ${isInView ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"}`}
                   >
-                    <div className="mb-6 flex h-11 w-11 items-center justify-center rounded-xl bg-accent/10 transition-all duration-300 group-hover:bg-primary/15">
+                    <div className="mb-6 flex h-11 w-11 items-center justify-center rounded-xl transition-all duration-300 bg-primary/10">
                       <item.icon className="h-5 w-5 text-primary" />
                     </div>
-                    <h3 className="text-xl font-semibold tracking-tight text-foreground">{item.title}</h3>
-                    <p className="mt-3 max-w-md text-[15px] leading-[1.7] text-muted-foreground">{item.description}</p>
+                    <h3 className="text-xl font-semibold tracking-tight text-primary">
+                      {item.title}
+                    </h3>
+                    <p className="mt-3 max-w-md text-[15px] leading-[1.7] text-foreground ">
+                      {item.description}
+                    </p>
                   </div>
                 ))}
               </div>

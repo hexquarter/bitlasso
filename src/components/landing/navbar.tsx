@@ -51,7 +51,7 @@ export function Navbar() {
                         to="/app"
                         className="hidden rounded-full bg-foreground px-6 py-2 text-[13px] font-medium text-background transition-all duration-300 hover:opacity-85 md:inline-flex"
                     >
-                        Start building
+                        Your dashboard
                     </Link>
 
                     <button
@@ -82,7 +82,7 @@ export function Navbar() {
                             onClick={() => setOpen(false)}
                             className="mt-2 rounded-full bg-foreground px-6 py-3 text-center text-sm font-medium text-background"
                         >
-                            Build your loop
+                            Your dashboard
                         </Link>
                     </div>
                 </div>

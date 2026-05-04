@@ -49,7 +49,7 @@ export function HeroSection() {
                             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
                             <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
                         </span>
-                        <span className="font-mono text-[11px] font-medium tracking-[0.15em] text-muted-foreground uppercase">Lightning-fast. Programmable. Autonomous.</span>
+                        <span className="font-mono text-[11px] font-medium tracking-[0.15em] text-muted-foreground uppercase">Open-Source. Programmable. Built on Lightning & Nostr.</span>
                     </div>
                 </div>
 
@@ -101,12 +101,12 @@ export function HeroSection() {
                         </div>
                     </div>
 
-                    <div className="lg:mt-10 flex flex-col gap-4 sm:flex-row sm:items-center">
+                    <div className="lg:mt-10 flex flex-col gap-4">
                         <Link
                             to="/app"
                             className="group inline-flex items-center gap-3 rounded-full bg-foreground px-8 py-4 text-[15px] font-medium text-background transition-all duration-300 hover:shadow-lg hover:shadow-foreground/10"
                         >
-                            Start building today
+                            Create your self-custodial checkout — $1 per payment
                             <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
                         </Link>
                         <Link
@@ -122,18 +122,26 @@ export function HeroSection() {
                 {/* Bottom - Stats strip */}
                 <div className="animate-fade-up opacity-0 delay-500 mt-auto">
                     <div className="flex flex-col gap-8 border-t border-border/40 pt-8 sm:flex-row sm:items-baseline sm:gap-16 md:gap-24">
-                        {[
-                            { value: 1, prefix: "~$", suffix: "", label: "Per checkout" },
-                            { value: 10, prefix: "<", suffix: "s", label: "Lightning settlement" },
-                            { value: 100, prefix: "", suffix: "%", label: "Self-custodial" },
-                        ].map((stat) => (
-                            <div key={stat.label}>
-                                <p className="font-mono text-4xl font-medium tracking-tight text-foreground md:text-5xl">
-                                    <AnimatedNumber target={stat.value} prefix={stat.prefix} suffix={stat.suffix} />
-                                </p>
-                                <p className="mt-1.5 text-[13px] tracking-wide text-muted-foreground/60">{stat.label}</p>
-                            </div>
-                        ))}
+                        {
+                            // [
+                            //     { value: 100, prefix: "", suffix: "%", label: "Self-custodial" },
+                            //     { value: 10, prefix: "<", suffix: "s", label: "Lightning settlement" },
+                            //     { value: 0, prefix: "", suffix: "", label: "platform fee" },
+                            // ]
+                            [
+                                { value: 100, suffix: "%", label: "You keep your revenue" },
+                                { value: 10, prefix: "<", suffix: "s", label: "Lightning settlement" },
+                                { value: 1, prefix: "$", suffix: "", label: "Flat per payment" },
+                                { value: 0, suffix: "%", label: "Revenue cut or subscription" }
+                            ]
+                                .map((stat) => (
+                                    <div key={stat.label}>
+                                        <p className="font-mono text-4xl font-medium tracking-tight text-foreground md:text-5xl">
+                                            <AnimatedNumber target={stat.value} prefix={stat.prefix} suffix={stat.suffix} />
+                                        </p>
+                                        <p className="mt-1.5 text-[13px] tracking-wide text-muted-foreground/60">{stat.label}</p>
+                                    </div>
+                                ))}
                     </div>
                 </div>
             </div>

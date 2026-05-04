@@ -226,6 +226,7 @@ export const PaymentRequestForm: React.FC<Props> = ({ onSubmit, price, settings,
                             <p className="text-2xl font-bold text-primary">${totalAmount.toFixed(2)}</p>
                         </CardContent>
                         <CardFooter className="flex flex-col gap-5 items-start">
+                            {vatRate == 0 && <p className="text-xs text-gray-400">No VAT applied.</p>}
                             {vatRate > 0 && <p className="text-xs text-gray-400">Total amount (with VAT): {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(totalAmount * (1 + (vatRate / 100)))}</p>}
                             <p className="text-xs text-gray-400">A BTC payment equivalent will be present and refreshed on the checkout page matching the most recent rate.</p>
                         </CardFooter>

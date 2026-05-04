@@ -282,7 +282,7 @@ const PendingPaymentState: React.FC<{
                                 <span className="text-xs text-neutral-400">Net: {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(paymentRequest.amount)}</span>
                                 <span className="text-xs text-neutral-400">{paymentRequest.orgDetails
                                     ? paymentRequest.vat !== undefined ? ` VAT: ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(paymentRequest.amount * (1 + (paymentRequest.vat / 100)))} (${paymentRequest.vat}%)` : ''
-                                    : ''
+                                    : 'VAT not applied'
                                 }</span>
                             </div>
                             <div className="text-xs text-neutral-500 flex justify-center flex-col">

@@ -30,7 +30,7 @@ export function ForDevlopersSection() {
   const isInView = useInView(ref, { once: true, margin: '-80px' })
 
   return (
-    <section className="relative border-t border-border/40 px-6 py-32 sm:px-10 md:py-40 lg:px-16">
+    <section id="for-developers" className="relative border-t border-border/40 px-6 py-32 sm:px-10 md:py-40 lg:px-16">
       <div ref={ref} className="mx-auto max-w-[90rem]">
         {/* Header */}
         <div className={`mb-24 transition-all duration-1000 ${isInView ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>

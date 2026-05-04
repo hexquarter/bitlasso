@@ -8,7 +8,7 @@ const links = [
     { label: "How It Works", href: "#how-it-works" },
     { label: "Why Bitcoin", href: "#why-bitcoin" },
     { label: "Real Rewards", href: "#orwa" },
-    // { label: "oRWA", href: "#orwa" },
+    { label: "For builders", href: "#for-developers" },
     // { label: "Decentralized", href: "#decentralized" },
     // { label: "Self-custodial", href: "#self-custody"},
     { label: "Pricing", href: "#pricing" },

@@ -43,6 +43,10 @@ export const LoginPage = () => {
                 sparkIdentityKey: await wallet.getIdentityPubkey()
             })
         }
+        else if (!settings.sparkIdentityKey) {
+            settings.sparkIdentityKey = await wallet.getIdentityPubkey()
+            await registerSettings(wallet, settings)
+        }
 
         setLoading(false)
         navigate('/app/dashboard', { replace: true })
@@ -63,6 +67,10 @@ export const LoginPage = () => {
                 sparkIdentityKey: await wallet.getIdentityPubkey()
             })
         }
+        else if (!settings.sparkIdentityKey) {
+            settings.sparkIdentityKey = await wallet.getIdentityPubkey()
+            await registerSettings(wallet, settings)
+        }
 
         setLoading(false)
         navigate('/app/dashboard', { replace: true })
@@ -77,6 +85,19 @@ export const LoginPage = () => {
             console.log('passkey authentication successful, wallet connected')
             const sparkAddress = await wallet.getSparkAddress()
             posthog?.identify(sparkAddress)
+
+            const settings = await fetchSettings(wallet)
+            if (!settings) {
+                console.log('initializing wallet settings')
+                await registerSettings(wallet, {
+                    sparkIdentityKey: await wallet.getIdentityPubkey()
+                })
+            }
+            else if (!settings.sparkIdentityKey) {
+                settings.sparkIdentityKey = await wallet.getIdentityPubkey()
+                await registerSettings(wallet, settings)
+            }
+
             setLoading(false)
             navigate('/app/dashboard', { replace: true })
         } catch (e) {
@@ -104,6 +125,13 @@ export const LoginPage = () => {
                     },
                     sparkIdentityKey: await wallet.getIdentityPubkey()
                 })
+            }
+            else if (!settings.sparkIdentityKey) {
+                settings.sparkIdentityKey = await wallet.getIdentityPubkey()
+                settings.notification = {
+                    npub: nostrConnection.npub
+                }
+                await registerSettings(wallet, settings)
             }
             else {
                 settings.notification = {

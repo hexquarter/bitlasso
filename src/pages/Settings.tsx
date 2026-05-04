@@ -81,13 +81,12 @@ export const SettingsPage = () => {
                 const encryptedPassphrase = await fetchEncryptedPassphrase(wallet.nostrConnection.pubkey)
                 if (!encryptedPassphrase) {
                     setNostrBackup(false)
-                    return
                 }
-
-                setNostrBackup(nostrConnection.pubkey !== wallet.nostrConnection.pubkey)
+                else {
+                    setNostrBackup(nostrConnection.pubkey !== wallet.nostrConnection.pubkey)
+                }
             }
 
-            console.log('Generating API snippet with wallet pubkey', wallet.nostrConnection.pubkey)
             setSnippet(`curl -X POST ${getApiUrl('/payment-request')} \\
   -H "Content-Type: application/json" \\
   -d     '{

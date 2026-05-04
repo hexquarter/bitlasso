@@ -327,7 +327,7 @@ export const SettingsPage = () => {
                                             </div>
                                             <div className="flex gap-2 lg:flex-row flex-col">
                                                 <Button
-                                                    className={`text-sm gap-2 justify-start group px-4`}
+                                                    className={`text-sm gap-2 justify-start group px-4 w-full`}
                                                     variant='default'
                                                     onClick={handleSaveOrgSettings} disabled={orgSettingSaveLoading}>
                                                     <div className="flex gap-2 justify-center items-center">

@@ -16,6 +16,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { getApiUrl } from "@/lib/api"
 import { CgOrganisation } from "react-icons/cg";
 import { connectViaExtension, encryptPassphrase, isNostrExtensionAvailable } from "@/lib/nostr-connect"
+import { getWallet, isPasskeyMode } from "@/lib/passkey"
 
 
 export const SettingsPage = () => {
@@ -143,7 +144,19 @@ export const SettingsPage = () => {
         }, 1000)
     }
 
-    const handleRevealSecret = () => {
+    const handleRevealSecret = async () => {
+        if (isPasskeyMode()) {
+            try {
+                const wallet = await getWallet()
+                if (wallet.seed.type == 'mnemonic') {
+                    setMnemonic(wallet.seed.mnemonic.split(' '))
+                }
+            }
+            catch (error) {
+                console.error('Failed to retrieve passkey wallet', error)
+            }
+        }
+
         const _mnemonic = localStorage.getItem('BITLASSO_MNEMONIC') as string
         setMnemonic(_mnemonic.split(' '))
         void (() => posthog?.capture('wallet_secret_revealed'))()

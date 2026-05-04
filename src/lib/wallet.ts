@@ -167,7 +167,9 @@ export class BreezSparkWallet extends TypedEventEmitter<BreezEvent> implements W
 
         if (!nostrConnection) {
             const nsec = deriveNsec(seed.type == 'mnemonic' ? seed.mnemonic : new Uint8Array(seed))
-            const connection = await connectViaNsec(nsec)
+            console.log('Derived nsec for Nostr connection')
+            const connection = connectViaNsec(nsec)
+            console.log('nostr connection', connection)
             nostrConnection = connection
         }
 

@@ -60,7 +60,7 @@ export const PaymentRequestForm: React.FC<Props> = ({ onSubmit, price, settings,
             item.id === itemId ? { ...item, amount: Number.isNaN(amount) ? 0 : amount } : item
         )
         setItems(newItems)
-        setReady(newItems.some(item => item.amount > 0 && item.description.trim()))
+        setReady(newItems.some(item => item.amount > 0))
     }
 
     const handleChangeTitle = (val: string, itemId: string) => {

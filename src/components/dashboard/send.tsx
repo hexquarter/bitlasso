@@ -50,30 +50,34 @@ export const Send: React.FC<Props> = ({ wallet, assets, price, onSend }) => {
 
             try {
                 setLoadingFee(true)
+                let feeSats = 0
                 switch (method) {
                     case "spark":
                         if (selectedAsset.symbol == "sat") {
-                            const feeSats = await wallet.getTransferFee("spark", recipient, amount)
+                            feeSats = await wallet.getTransferFee("spark", recipient, amount)
                             setFee(Number(feeSats))
                         }
                         else {
-                            const feeSats = await wallet.getTransferFee("token", recipient, amount, selectedAsset.identifier)
+                            feeSats = await wallet.getTransferFee("token", recipient, amount, selectedAsset.identifier)
                             setFee(Number(feeSats))
                         }
                         break
                     case "bitcoin":
-                        const btcFeeSats = await wallet.getTransferFee("bitcoin", recipient, amount)
-                        setFee(Number(btcFeeSats))
+                        feeSats = await wallet.getTransferFee("bitcoin", recipient, amount)
+                        setFee(Number(feeSats))
                         break
                     case "lightning":
-                        const lnFeeSats = await wallet.getTransferFee("lightning", recipient, amount)
-                        setFee(Number(lnFeeSats))
+                        feeSats = await wallet.getTransferFee("lightning", recipient, amount)
+                        setFee(Number(feeSats))
                         break
                 }
 
                 setLoadingFee(false)
+                if (feeSats > 0) {
+                    setAmount(amount - feeSats)
+                }
             }
-            catch (e) {
+            catch (_e) {
                 setLoadingFee(false)
             }
         }

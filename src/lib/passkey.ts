@@ -12,7 +12,7 @@ import { Passkey, type Wallet, type NostrRelayConfig } from '@breeztech/breez-sd
 import { passkeyPrfProvider } from './passkeyProvider';
 
 // Storage key — presence signals passkey mode
-const PASSKEY_LABEL_KEY = 'passkeyLabel';
+const PASSKEY_LABEL_KEY = 'BITLASSO_PASSKEY_LABEL';
 
 /**
  * Create a fresh Passkey instance.

@@ -29,7 +29,6 @@ export const SettingsPage = () => {
     const [mnemonic, setMnemonic] = useState<string[]>([])
     const [saveNotifLoading, setSaveNotifLoading] = useState(false)
     const [hasSecuredMnemonic, setHashSecureMnemonic] = useState(localStorage.getItem('BITLASSO_SECURED_MNEMONIC') || 'false')
-    const [snippet, setSnippet] = useState('')
     const [jsSnippet, setJsSnippet] = useState('')
 
     const [orgSettings, setOrgSettings] = useState<OrgSettings>({ name: '', vat: 0.0, registrationNumber: '' })
@@ -88,20 +87,18 @@ export const SettingsPage = () => {
                 }
             }
 
-            setSnippet(`curl -X POST ${getApiUrl('/payment-request')} \\
-  -H "Content-Type: application/json" \\
-  -H "Authorization: <NIP-98-AUTH-TOKEN>" \\
-  -d '{
-    "amount": 1000,
-    "description": "Payment for services"
-  }'`)
-
             setJsSnippet(`import { nip98 } from 'nostr-tools'
 
 // Your payment request data
 const paymentRequest = {
-  amount: 1000,
-  description: "Payment for services"
+    amount: 1000,
+    items: [
+      {
+        title: 'Consulting session',
+        description: '1 hour of consulting',
+        amount: 1000
+      }
+    ]
 }
 
 // Generate NIP-98 auth token
@@ -540,25 +537,6 @@ const result = await response.json()`)
                                                         onClick={() => {
                                                             navigator.clipboard.writeText(jsSnippet)
                                                             toast.success('JavaScript snippet copied')
-                                                        }}
-                                                    >
-                                                        <Copy className="h-3 w-2" />
-                                                    </Button>
-                                                </div>
-                                            </div>
-                                            <div className="flex flex-col gap-2">
-                                                <Label className="text-xs text-muted-foreground font-mono">CURL example (requires pre-generated auth token)</Label>
-                                                <div className="relative group">
-                                                    <pre className="p-3 rounded-md bg-zinc-950 text-zinc-300 text-[10px] overflow-x-auto font-mono border border-zinc-800">
-                                                        {snippet}
-                                                    </pre>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        className="absolute border text-white top-2 right-2  h-6 w-6 p-4"
-                                                        onClick={() => {
-                                                            navigator.clipboard.writeText(snippet)
-                                                            toast.success('CURL snippet copied')
                                                         }}
                                                     >
                                                         <Copy className="h-3 w-2" />

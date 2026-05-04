@@ -87,16 +87,14 @@ export const SettingsPage = () => {
                 setNostrBackup(nostrConnection.pubkey !== wallet.nostrConnection.pubkey)
             }
 
-            if (wallet) {
-                console.log('Generating API snippet with wallet pubkey', wallet.nostrConnection.pubkey)
-                setSnippet(`curl -X POST ${getApiUrl('/payment-request')} \\
+            console.log('Generating API snippet with wallet pubkey', wallet.nostrConnection.pubkey)
+            setSnippet(`curl -X POST ${getApiUrl('/payment-request')} \\
   -H "Content-Type: application/json" \\
   -d     '{
     "pubkey": "${wallet.nostrConnection.pubkey}", 
     "amount": 1000,
     "description": "Payment for services"
   }'`)
-            }
         }
 
         fetchData()

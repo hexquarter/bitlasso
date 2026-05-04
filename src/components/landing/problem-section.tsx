@@ -136,7 +136,7 @@ export function ProblemSection() {
               <div className="grid gap-3 md:grid-cols-2">
                 {differentiators.map((item, i) => (
                   <div
-                    key={item.title}
+                    key={i}
                     className={`group relative overflow-hidden rounded-2xl border bg-whitge shadow-lg p-8 transition-all duration-400  md:p-10 ${isInView ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"}`}
                   >
                     <div className="mb-6 flex h-11 w-11 items-center justify-center rounded-xl transition-all duration-300 bg-primary/10">

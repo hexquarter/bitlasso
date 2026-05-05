@@ -1,0 +1,52 @@
+{
+  "name": "@bitlasso/sdk",
+  "version": "0.1.0",
+  "description": "TypeScript SDK for BitLasso - Direct API access to Bitcoin/Spark payment functionality",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "rm -rf dist && tsc",
+    "dev": "tsc --watch",
+    "prepublishOnly": "npm run build",
+    "test": "echo \"No tests specified yet\""
+  },
+  "keywords": [
+    "bitcoin",
+    "lightning",
+    "spark",
+    "payments",
+    "cryptocurrency",
+    "sdk",
+    "typescript"
+  ],
+  "author": "BitLasso",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-repo/bitlasso"
+  },
+  "dependencies": {
+    "@breeztech/breez-sdk-spark": "^0.13.9-debug",
+    "@buildonspark/spark-sdk": "^0.7.17",
+    "@noble/curves": "^2.2.0",
+    "@scure/bip32": "^2.2.0",
+    "@scure/bip39": "^2.2.0",
+    "nostr-tools": "^2.23.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.8.3"
+  },
+  "peerDependencies": {
+    "@breeztech/breez-sdk-spark": "^0.13.1",
+    "@buildonspark/spark-sdk": "^0.7.15"
+  },
+  "peerDependenciesMeta": {
+    "@breeztech/breez-sdk-spark": {
+      "optional": true
+    },
+    "@buildonspark/spark-sdk": {
+      "optional": true
+    }
+  }
+}

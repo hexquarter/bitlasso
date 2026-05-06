@@ -107,7 +107,7 @@ const getColumns = (onDeriveReceipt: (data: IssueReceiptData) => Promise<void>, 
                             {Intl.NumberFormat(navigator.language || "en-US", { style: 'currency', currency: 'USD' }).format(row.original.amount)}
                         </span>
                         {row.original.redeemAmount && <span>
-                            {Intl.NumberFormat(navigator.language || "en-US", { style: 'currency', currency: 'USD' }).format(row.original.amount - row.original.redeemAmount)}
+                            {Intl.NumberFormat(navigator.language || "en-US", { style: 'currency', currency: 'USD' }).format(row.original.amount + row.original.redeemAmount)}
                         </span>}
                     </div>
                 )

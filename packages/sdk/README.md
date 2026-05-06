@@ -1,10 +1,10 @@
 # BitLasso SDK
 
-A TypeScript SDK for integrating Bitcoin and Spark payments directly into your applications, bypassing the BitLasso UI.
+A TypeScript SDK for integrating Bitcoin and Spark payments directly into your applications, bypassing the Bitlasso UI.
 
 ## Features
 
-- 🚀 **Direct API Access**: Interact with BitLasso APIs without the web interface
+- 🚀 **Direct API Access**: Interact with Bitlasso APIs without the web interface
 - 💰 **Payment Operations**: Create payment requests, process payments, manage credits
 - 🏦 **Wallet Operations**: Full wallet functionality including token minting, transfers, and balance management
 - 🔐 **Authentication**: Support for Nostr extension and NSEC-based authentication
@@ -14,7 +14,7 @@ A TypeScript SDK for integrating Bitcoin and Spark payments directly into your a
 ## Installation
 
 ```bash
-npm install bitlasso-sdk
+npm install @bitlasso/sdk
 ```
 
 ## Quick Start
@@ -22,7 +22,7 @@ npm install bitlasso-sdk
 ### Wallet Operations
 
 ```typescript
-import { initializeWallet } from 'bitlasso-sdk';
+import { initializeWallet } from '@bitlasso/sdk';
 
 // Note: Wallet initialization requires full Breez SDK setup
 // This is a simplified example - actual implementation requires
@@ -50,7 +50,7 @@ console.log('Payment sent:', payment.paymentId);
 ### API Client
 
 ```typescript
-import { Client } from 'bitlasso-sdk';
+import { Client } from '@bitlasso/sdk';
 
 // Initialize the API client
 const api = new Client({
@@ -69,26 +69,22 @@ console.log('Available bundles:', settings.bundles);
 ### Authentication & Payment Requests
 
 ```typescript
-import { BitLassoWallet, createAuth, BitLassoAPI } from 'bitlasso-sdk';
+import { initializeWallet, Client } from '@bitlasso/sdk';
 
 // Note: Wallet initialization requires full Breez SDK setup
 // This is a simplified example - actual implementation requires
 // proper wallet initialization with seeds/API keys
 
-const wallet = await BitLassoWallet.initialize({
+const wallet = await initializeWallet({
   seed: { type: 'mnemonic', seed: ''},
   breezApiKey: 'your-api-key'
 });
 
-// Setup Nostr authentication
-const auth = createAuth(wallet.nostrConnection);
-
 // Create API client
-const api = new BitLassoAPI();
+const api = new Client();
 
 // Create a payment request
 const paymentRequest = {
-  amount: 100,
   items: [
     { title: 'Product A', description: 'Great product', amount: 50 },
     { title: 'Product B', description: 'Another product', amount: 50 }
@@ -96,115 +92,9 @@ const paymentRequest = {
   discountRate: 0
 };
 
-// Generate auth token
-const token = await auth.createPaymentRequestToken(paymentRequest, api);
-
 // Publish payment request
-const result = await api.publishPaymentRequest(paymentRequest, token);
+const result = await api.publishPaymentRequest(wallet, paymentRequest);
 console.log('Payment request created:', result.id);
-```
-
-## API Reference
-
-### BitLassoAPI
-
-Main API client for interacting with BitLasso services.
-
-#### Constructor
-
-```typescript
-new BitLassoAPI(config?: SDKConfig)
-```
-
-#### Methods
-
-- `getStatus()`: Get system status
-- `getSettings()`: Get system settings and bundles
-- `getPaymentPrice(paymentRequestId)`: Get current price for a payment request
-- `purchaseCredits(bundleId, receiverAddress, wallet?)`: Purchase credits
-- `publishPaymentRequest(paymentRequest, authToken, wallet?, tokenBalances?)`: Create payment request
-
-### BitLassoAuth
-
-Authentication utilities for generating tokens.
-
-#### Methods
-
-- `generateNIP98Token(url, method, body?)`: Generate NIP-98 auth token
-- `createPaymentRequestToken(paymentRequest, api)`: Create payment request token
-
-### BitLassoWallet
-
-Wallet operations interface.
-
-#### Static Methods
-
-- `BitLassoWallet.initialize(auth)`: Initialize wallet
-
-#### Instance Methods
-
-- `getSparkAddress()`: Get Spark address
-- `getBitcoinAddress()`: Get Bitcoin address
-- `getLightningAddress()`: Get Lightning address
-- `getBalance()`: Get wallet balance
-- `sendSparkPayment(address, amount?)`: Send Spark payment
-- `sendLightningPayment(invoice, amount?)`: Send Lightning payment
-- `sendOnChainPayment(address, amount)`: Send Bitcoin payment
-- `sendTokenTransfer(tokenId, amount, recipient)`: Send token transfer
-- `mintTokens(amount)`: Mint new tokens
-- `burnTokens(amount, tokenId?)`: Burn tokens
-- `createToken(name, symbol, supply, decimals, freezable)`: Create new token
-- `listPayments()`: List payment history
-- `fetchPrices()`: Get current prices
-
-## Types
-
-### SDKConfig
-
-```typescript
-interface SDKConfig {
-  apiUrl?: string;    // Custom API URL
-  dev?: boolean;      // Use localhost API
-}
-```
-
-### AuthConfig
-
-```typescript
-interface AuthConfig {
-  seed: { type: 'mnemonic', seed: string} | { type: 'entropy' & number[]};
-  breezApiKey: string;     // Required API key
-}
-```
-
-### PaymentRequest
-
-```typescript
-interface PaymentRequest {
-  amount: number;
-  items: PaymentItem[];
-  discountRate: number;
-}
-```
-
-### Wallet Operations
-
-See the `WalletOperations` interface for complete wallet method signatures.
-
-## Error Handling
-
-The SDK uses custom `SDKError` class for all errors:
-
-```typescript
-try {
-  const result = await api.getStatus();
-} catch (error) {
-  if (error instanceof SDKError) {
-    console.error('SDK Error:', error.code, error.message);
-  } else {
-    console.error('Unknown error:', error);
-  }
-}
 ```
 
 ## Development
@@ -212,15 +102,9 @@ try {
 ### Building
 
 ```bash
-cd sdk
-npm install
-npm run build
-```
-
-### Testing
-
-```bash
-npm test
+cd packages/sdk
+yarn
+yarn run build
 ```
 
 ## Requirements

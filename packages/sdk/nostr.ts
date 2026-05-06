@@ -1,11 +1,11 @@
-import { SimplePool, type Filter, type Event, type NostrEvent, nip44, getPublicKey, finalizeEvent, type VerifiedEvent, EventTemplate } from "nostr-tools"
+import { SimplePool, type Filter, type Event, type NostrEvent, nip44, getPublicKey, finalizeEvent, type VerifiedEvent, type EventTemplate } from "nostr-tools"
 import { bytesToHex, hexToBytes } from "nostr-tools/utils";
 import { bech32 } from "bech32";
 import { mnemonicToSeedSync } from "@scure/bip39";
 import { HDKey } from "@scure/bip32";
 
 import type { Wallet } from "./wallet";
-import { OrgSettings, Receipt, SDKConfig, UserSettings, PaymentRequest } from "./types";
+import type { OrgSettings, Receipt, SDKConfig, UserSettings, PaymentRequest } from "./types";
  
 const pool = new SimplePool({
     enablePing: true,

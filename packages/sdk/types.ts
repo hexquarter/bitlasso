@@ -2,8 +2,8 @@
  * Type definitions for the BitLasso SDK
  */
 
-import { DepositInfo, Seed, type Payment as BreezPayment } from "@breeztech/breez-sdk-spark/web";
-import { NostrConnection } from "./nostr";
+import type { DepositInfo, Seed, Payment as BreezPayment } from "@breeztech/breez-sdk-spark/web";
+import type { NostrConnection } from "./nostr";
 
 /**
  * Configuration options for the SDK

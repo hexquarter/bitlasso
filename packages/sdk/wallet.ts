@@ -5,7 +5,7 @@
  * abstracting away the complexity of the underlying Breez SDK.
  */
 
-import initBreezSDK, { BreezSdk, SdkBuilder, type PrepareLnurlPayResponse, type PrepareSendPaymentResponse, type SdkEvent, type Seed, Rate, Payment, TokenBalance, defaultConfig } from "@breeztech/breez-sdk-spark";
+import initBreezSDK, { BreezSdk, SdkBuilder, type PrepareLnurlPayResponse, type PrepareSendPaymentResponse, type SdkEvent, type Rate, type Payment, type TokenBalance, defaultConfig } from "@breeztech/breez-sdk-spark";
 import { SparkReadonlyClient } from "@buildonspark/spark-sdk";
 
 export { type Payment as BreezPayment } from "@breeztech/breez-sdk-spark"
@@ -23,7 +23,7 @@ import type {
     BreezEvent
 } from './types';
 import { SDKError } from './types';
-import { connectViaNsec, deriveNsec, NostrConnection } from "./nostr";
+import { connectViaNsec, deriveNsec, type NostrConnection } from "./nostr";
 import { uint8ArrayToNum } from "./utils";
 import { bytesToHex } from "nostr-tools/utils";
 

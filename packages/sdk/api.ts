@@ -13,7 +13,7 @@ import type {
   PaymentRequestPayload
 } from './types';
 import { SDKError } from './types';
-import { BreezPayment, Wallet } from './wallet';
+import type { BreezPayment, Wallet } from './wallet';
 
 /**
  * Bitlasso's API client class

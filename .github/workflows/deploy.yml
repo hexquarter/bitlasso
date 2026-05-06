@@ -20,6 +20,10 @@ jobs:
   build:
     name: Build packages
     runs-on: ubuntu-latest
+    env:
+      VITE_PUBLIC_POSTHOG_PROJECT_TOKEN: ${{ secrets.VITE_PUBLIC_POSTHOG_PROJECT_TOKEN }}
+      VITE_PUBLIC_POSTHOG_HOST: ${{ secrets.VITE_PUBLIC_POSTHOG_HOST }}
+      VITE_BREEZ_API_KEY: ${{ secrets.VITE_BREEZ_API_KEY }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -33,14 +37,8 @@ jobs:
       - name: Install dependencies
         run: yarn --frozen-lockfile
 
-      - name: Build UI
-        run: yarn build:ui
-
-      - name: Upload UI build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: ui-site
-          path: ./packages/ui/dist
+      - name: Build
+        run: yarn build
 
   deploy_website:
     name: Deploy website to GitHub Pages
@@ -50,19 +48,9 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    env:
-      VITE_PUBLIC_POSTHOG_PROJECT_TOKEN: ${{ secrets.VITE_PUBLIC_POSTHOG_PROJECT_TOKEN }}
-      VITE_PUBLIC_POSTHOG_HOST: ${{ secrets.VITE_PUBLIC_POSTHOG_HOST }}
-      VITE_BREEZ_API_KEY: ${{ secrets.VITE_BREEZ_API_KEY }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Download UI build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: ui-site
-          path: ./packages/ui/dist
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

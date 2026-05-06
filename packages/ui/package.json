@@ -67,7 +67,7 @@
     "tailwind-merge": "^3.3.1",
     "vaul": "^1.1.2",
     "zod": "^4.1.5",
-    "@bitlasso/sdk": "file:../sdk/dist"
+    "@bitlasso/sdk": "file:../sdk"
   },
   "devDependencies": {
     "@eslint/js": "^9.33.0",

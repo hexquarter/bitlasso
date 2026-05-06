@@ -29,11 +29,11 @@
     "sdk",
     "typescript"
   ],
-  "author": "BitLasso",
+  "author": "HexQuarter",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-repo/bitlasso"
+    "url": "https://github.com/hexquarter/bitlasso"
   },
   "dependencies": {
     "@breeztech/breez-sdk-spark": "^0.13.9-debug",

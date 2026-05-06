@@ -1,5 +1,5 @@
 # CI workflow for building the monorepo, deploying the UI, and publishing the SDK package
-name: CI and Deploy Website
+name: Deploy SDK and Website
 
 on:
   push:
@@ -17,8 +17,12 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  build:
-    name: Build packages
+  deploy_website:
+    name: Deploy website to GitHub Pages
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     env:
       VITE_PUBLIC_POSTHOG_PROJECT_TOKEN: ${{ secrets.VITE_PUBLIC_POSTHOG_PROJECT_TOKEN }}
@@ -39,26 +43,11 @@ jobs:
 
       - name: Build
         run: yarn build
-
-  deploy_website:
-    name: Deploy website to GitHub Pages
-    needs: build
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-
+      
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./packages/ui/dist
+          path: './packages/ui/dist'
 
       - name: Deploy to GitHub Pages
         id: deployment
@@ -66,7 +55,6 @@ jobs:
 
   publish-sdk:
     name: Publish SDK package
-    needs: build
     if: github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/main')
     runs-on: ubuntu-latest
     env:
@@ -81,7 +69,10 @@ jobs:
           node-version: '22'
           cache: 'npm'
 
-      - name: Build SDK package
+      - name: Install dependencies
+        run: yarn --frozen-lockfile
+
+      - name: Build UI
         run: yarn build:sdk
 
       - name: Publish SDK to npm

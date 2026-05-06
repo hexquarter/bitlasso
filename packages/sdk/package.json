@@ -3,7 +3,17 @@
   "version": "0.1.0",
   "description": "TypeScript SDK for BitLasso - Direct API access to Bitcoin/Spark payment functionality",
   "main": "dist/index.js",
+  "module": "./dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "rm -rf dist && tsc",
     "dev": "tsc --watch",

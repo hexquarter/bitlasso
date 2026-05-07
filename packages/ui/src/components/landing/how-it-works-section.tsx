@@ -15,27 +15,27 @@ const steps = [
   {
     icon: FileText,
     title: "Create a payment request",
-    description: "Generate via UI or API. Link to project/milestone. Set which tokens to issue. Configure webhook for automated token minting.",
+    description: "Generate via UI or API. Attach it to a project, API call, or milestone. Optionally define a credit issuance rule for later use.",
     img: CreatePaymentRequest,
     img2: Carbon,
   },
   {
     icon: Zap,
     title: "Payment settles instantly",
-    description: "Client pays over Lightning Network. <2 second settlement. Your webhook fires with cryptographic proof. Email/Nostr/webhook notification per config.",
+    description: "Generate a Lightning invoice via UI or API. Funds settle in <10 seconds with cryptographic confirmation. Webhooks fire immediately when payment is confirmed.",
     img: PaymentCertificate,
   },
   {
     icon: Award,
-    title: "Mint an earned credit",
-    description: "Issue self-custodial token manually (today) or via webhook automation. Represents earned value from completed work.",
+    title: "Issue earned credits (optional)",
+    description: "Issue self-custodial credit manually today or via webhook automation. Represents value earned value from completed work.",
     img: MintCredits,
 
   },
   {
     icon: RotateCcw,
-    title: "Drive repeat revenue",
-    description: "Clients redeem tokens for discounts on future payments, increasing retention and automating loyalty at scale.",
+    title: "Credits enable repeat payments",
+    description: "Credits can be redeemed against future invoices creating optional retention and incentive loops on top of Lightning payments.",
     img: Redeeem,
   },
 ]
@@ -49,16 +49,16 @@ export function HowItWorksSection() {
   return (
     <section id="how-it-works" className="relative overflow-hidden border-t border-border/40 bg-white px-6 py-32 sm:px-10 md:py-40 lg:px-16">
       <div ref={ref} className="mx-auto max-w-[90rem]">
-        <div className="grid gap-8 lg:grid-cols-[1fr_2fr]">
-          <div className={`transition-all duration-1000 ${isInView ? "translate-y-0 opacity-50" : "translate-y-8 opacity-0"}`}>
+        <div className="flex flex-col gap-8">
+          <div className={`transition-all duration-1000`}>
             <p className="font-mono text-[11px] font-medium tracking-[0.2em] text-primary uppercase">How it works</p>
           </div>
           <div className={`transition-all duration-1000 delay-100 ${isInView ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"}`}>
-            <h2 className="max-w-2xl font-serif text-[clamp(2rem,4.5vw,3.75rem)] font-normal leading-[1.1] tracking-tight text-foreground">
-              Quick & easy. From invoice to credits.
+            <h2 className="font-serif text-[clamp(2rem,4.5vw,3.75rem)] font-normal leading-[1.1] tracking-tight text-foreground">
+              From invoice to earned value.
             </h2>
             <p className="mt-6 max-w-xl text-pretty text-lg leading-[1.7] text-muted-foreground">
-              From invoice to earned credit in a straightforward Lightning flow that respects your time and your client's sovereignty.
+              Create a Lightning invoice, settle payments instantly, and optionally issue credits for future redemption or automation.
             </p>
           </div>
         </div>

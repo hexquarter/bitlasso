@@ -21,33 +21,33 @@ import { Hammer, Sparkles } from "lucide-react"
 
 const problems = [
   {
-    title: "Bitcoin adoption hits a wall",
-    description: "Lower fees, global payments, aligned with the future. But every platform takes custody, charges percentage fees, and treats Bitcoin like legacy payments.",
+    title: "Custody breaks the model",
+    description: "Most platforms take custody of funds, turning Bitcoin into a traditional payment system with intermediaries and counterparty risk.",
   },
   {
-    title: "Existing platforms tax your growth",
-    description: "1–2% of every transaction gone. Your funds held custodially. Zero programmability for automation.",
+    title: "Fees scale with your success",
+    description: "1–2% per transaction disappears as revenue grows. Bitcoin becomes expensive exactly when you succeed.",
   },
   {
-    title: "Retention is an afterthough",
-    description: "Create repeatable business and incentivize customers requires manual work. Redemption flows are clunky. Scaling loyalty means more operational overhead.",
+    title: "No native retention layer",
+    description: "Repeat payments, incentives, and loyalty flows require external systems and manual infrastructure.",
   },
   {
-    title: "No programmable payments",
-    description: "Can't build payment logic into your API. L402-gated services aren't possible. Autonomous systems remain a future dream.",
+    title: "No programmable checkout layer",
+    description: "Bitcoin is money, not an execution layer. You can’t embed payment logic directly into APIs or services.",
   },
 ]
 
 const differentiators = [
   {
     icon: Sparkles,
-    title: "Flat fee per request, not percentage tax",
-    description: "Pay $1 per payment request (or less with bundles). No transaction cuts. Direct to your self-custodial wallet. Margins scale with your business.",
+    title: "Flat fee per payment, not a percentage tax",
+    description: "Pay per successful request. No revenue cuts. Funds settle directly to your wallet.",
   },
   {
     icon: Hammer,
-    title: "API + UI + L402-ready",
-    description: "Create payment requests manually or programmatically via API. L402 payment gateway. Webhooks trigger token issuance. Ready for agentic automation tomorrow.",
+    title: "Checkout built for APIs, apps, and agents",
+    description: "Generate payment requests via API or UI. Trigger webhooks. Enable automated payment flows and L402-compatible services.",
   },
 ]
 
@@ -65,11 +65,12 @@ export function ProblemSection() {
             </div>
             <div className={`transition-all duration-1000 delay-100 ${isInView ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"}`}>
               <h2 className="font-serif text-[clamp(2rem,4.5vw,3.75rem)] font-normal leading-[1.1] tracking-tight">
-                Accepting Bitcoin…<br /><span className="text-primary">until the tools get in the way</span>
+                Bitcoin works for holding value. <br />
+                Not for running payments at scale.
               </h2>
-              <p className="mt-6 max-w-xl text-pretty text-lg leading-[1.7] text-muted-foreground">
+              {/* <p className="mt-6 max-w-xl text-pretty text-lg leading-[1.7] text-muted-foreground">
                 Lower fees, global reach, aligned with the agentic future. But custody, fees, and zero programmability kill the Bitcoin promise.
-              </p>
+              </p> */}
             </div>
 
             {/* <div className="space-y-10">
@@ -102,16 +103,14 @@ export function ProblemSection() {
             </div> */}
 
             {/* Bento grid - varied card sizes */}
-            <div className="mt-20 grid gap-3 md:grid-cols-2 lg:grid-cols-12">
+            <div className="mt-20 grid gap-3 md:grid-cols-2 lg:grid-cols-4">
               {problems.map((problem, i) => {
-                const spans = ["lg:col-span-7", "lg:col-span-5", "lg:col-span-5", "lg:col-span-7"]
                 return (
                   <div
                     key={problem.title}
-                    className={`group relative overflow-hidden rounded-2xl border border-border/40 bg-card p-8 transition-all duration-700 hover:border-border/80 hover:shadow-lg md:p-10 ${spans[i]} ${isInView ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"}`}
-                    style={{ transitionDelay: isInView ? `${300 + i * 100}ms` : "0ms" }}
+                    className={`group relative overflow-hidden rounded-2xl border border-border/40 bg-card p-8 transition-all duration-700 hover:border-border/80 hover:shadow-lg md:p-10 ${isInView ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"}`}
                   >
-                    <div className="pointer-events-none absolute -right-6 -top-6 font-serif text-[8rem] font-bold leading-none text-foreground/[0.025]">
+                    <div className="pointer-events-none absolute -right-6 -top-6 font-serif text-[8rem] font-bold leading-none text-primary/5">
                       {String(i + 1).padStart(2, "0")}
                     </div>
                     <div className="relative">
@@ -137,7 +136,7 @@ export function ProblemSection() {
                 {differentiators.map((item, i) => (
                   <div
                     key={i}
-                    className={`group relative overflow-hidden rounded-2xl border bg-whitge shadow-lg p-8 transition-all duration-400  md:p-10 ${isInView ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"}`}
+                    className={`group relative overflow-hidden rounded-2xl border bg-white shadow-lg p-8 transition-all duration-400  md:p-10 ${isInView ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"}`}
                   >
                     <div className="mb-6 flex h-11 w-11 items-center justify-center rounded-xl transition-all duration-300 bg-primary/10">
                       <item.icon className="h-5 w-5 text-primary" />

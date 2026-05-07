@@ -1,80 +1,278 @@
 "use client"
 
-import { useRef } from "react"
-import { FileCheck, Handshake, ShieldCheck } from "lucide-react"
-import { useInView } from "@/hooks/use-in-view"
-
-const receipts = [
-  { icon: FileCheck, label: "Proof that work was completed" },
-  { icon: Handshake, label: "Proof that value was delivered" },
-  { icon: ShieldCheck, label: "Proof that trust was earned" },
-]
-
-const facts = [
-  "Not securities, financial instruments, or speculative assets",
-  "Bitcoin received is fully retained by merchants",
-  "Issuance rules and redemption terms are merchant-defined",
-  "Built for repeat business and agent-driven automation",
-  "Powered by Lightning + Nostr for decentralized, programmable infrastructure",
-]
+import {
+  ShieldCheck,
+  Coins,
+  Workflow,
+  Zap,
+  Ban,
+  User,
+  Percent,
+  TrendingUp,
+  Bitcoin,
+  BarChart3,
+  Tag,
+  Radio,
+} from "lucide-react"
 
 export function OperationalSection() {
-  const ref = useRef<HTMLDivElement>(null)
-  const isInView = useInView(ref, { once: true, margin: "-80px" })
 
   return (
-    <section id="orwa" className="relative overflow-hidden border-t border-border/40  bg-slate-50 px-6 py-32 sm:px-10 md:py-40 lg:px-16">
-      <div ref={ref} className="mx-auto max-w-[90rem]">
-        {/* Large typographic statement */}
-        <div className={`mb-24 transition-all duration-1000 ${isInView ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"}`}>
-          <p className="mb-5 font-mono text-[11px] font-medium tracking-[0.2em] text-primary uppercase">Operational, not speculation.</p>
-          <h2 className="max-w-4xl font-serif text-[clamp(2rem,4.5vw,3.75rem)] font-normal leading-[1.1] tracking-tight text-foreground">
-            This is a payments tool, not a token market
+    <section
+      id="real-tokens"
+      className="relative overflow-hidden border-t border-border/40 bg-slate-50 px-6 py-32 sm:px-10 md:py-40 lg:px-16"
+    >
+      <div className="mx-auto max-w-[90rem]">
+        {/* Top heading */}
+        <div className="">
+          <p className="mb-4 font-mono text-[11px] font-medium uppercase tracking-[0.25em] text-primary">
+            Loop of Work
+          </p>
+
+          <h2 className="font-serif text-[clamp(2.5rem,6vw,5rem)] leading-[0.95] tracking-tight text-foreground">
+            Payments in.
+            Value out.
           </h2>
-          <p className="mt-6 max-w-xl text-pretty text-lg leading-[1.7] text-muted-foreground">
-            Tokens are operational receipts—proof of work, value, and trust. You can automate the entire lifecycle. No speculation. Pure utility.
+
+          <p className="mt-6 max-w-2xl text-lg leading-[1.8] text-muted-foreground">
+            A closed-loop Lightning payment system that rewards real work,
+            enables repeat transactions, and creates programmable operational value.
           </p>
         </div>
 
-        {/* Bento layout: 3 proof cards + 1 large facts card */}
-        <div className="grid gap-3 lg:grid-cols-12">
-          {/* Proof cards - stacked column */}
-          <div className="flex flex-col gap-3 lg:col-span-5">
-            {receipts.map((item) => (
+        {/* Main visual */}
+        <div className="flex flex-col lg:flex-row gap-10 mx-auto mt-24 bg-white p-10 rounded-xl shadow-lg">
+
+          {/* Side labels */}
+          <div className="flex flex-col gap-10">
+
+            <div className="flex gap-5">
+              <div>
+                <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+                  <Zap className="h-5 w-5 text-primary" />
+                </div>
+              </div>
+
+              <div className="flex flex-col">
+                <h3 className="text-xl font-semibold tracking-tight text-foreground">
+                  Customer Payment
+                </h3>
+
+                <p className="text-[15px] leading-[1.8] text-muted-foreground">
+                  Clients pay instantly over Lightning and receive operational value.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-5">
+              <div>
+                <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+                  <Tag className="h-5 w-5 text-primary" />
+                </div>
+              </div>
+
+              <div className="flex flex-col">
+                <h3 className="text-xl font-semibold tracking-tight text-foreground">
+                  Token Usage
+                </h3>
+
+                <p className="text-[15px] leading-[1.8] text-muted-foreground">
+                  Tokens unlock discounts, credits, and future payment redemption.
+                </p>
+              </div>
+            </div>
+
+
+
+            <div className="flex gap-5">
+              <div>
+                <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+                  <BarChart3 className="h-5 w-5 text-primary" />
+                </div>
+              </div>
+
+              <div className="flex flex-col">
+                <h3 className="text-xl font-semibold tracking-tight text-foreground">
+                  Earned value
+                </h3>
+
+                <p className="text-[15px] leading-[1.8] text-muted-foreground">
+                  Completed work and utility create natural scarcity over time.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-5">
+              <div>
+                <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+                  <Bitcoin className="h-5 w-5 text-primary" />
+                </div>
+              </div>
+
+              <div className="flex flex-col">
+                <h3 className="text-xl font-semibold tracking-tight text-foreground">
+                  Bitcoin Treasury
+                </h3>
+
+                <p className="text-[15px] leading-[1.8] text-muted-foreground">
+                  Merchants retain Bitcoin directly and build treasury over time.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-5">
+              <div>
+                <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+                  <TrendingUp className="h-5 w-5 text-primary" />
+                </div>
+              </div>
+
+              <div className="flex flex-col">
+                <h3 className="text-xl font-semibold tracking-tight text-foreground">
+                  Operational Value
+                </h3>
+
+                <p className="text-[15px] leading-[1.8] text-muted-foreground">
+                  Payment activity creates incentives for repeat transactions and long-term engagement.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-5">
+              <div>
+                <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+                  <Percent className="h-5 w-5 text-primary" />
+                </div>
+              </div>
+
+              <div className="flex flex-col">
+                <h3 className="text-xl font-semibold tracking-tight text-foreground">
+                  Increased Discounts
+                </h3>
+
+                <p className="text-[15px] leading-[1.8] text-muted-foreground">
+                  More activity unlocks stronger incentives and retention loops.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* CENTER VISUAL */}
+          <div className="relative flex flex-col md:flex-row items-center justify-center py-10">
+
+            {/* LEFT CIRCLE */}
+            <div className="relative h-[20rem] w-[20rem] rounded-full bg-primary">
+
+              {/* Ring */}
+              <div className="absolute inset-6 rounded-full border bg-white/90" />
+
+              {/* Center */}
+              <div className="absolute left-1/2 top-1/2 flex h-40 w-40 -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-full border border-border/40 bg-background shadow-sm">
+                <Coins className="mb-4 h-10 w-10 text-primary" />
+
+                <p className="font-mono text-sm uppercase tracking-[0.2em] text-foreground">
+                  Payments
+                </p>
+              </div>
+
+            
+            </div>
+
+            {/* RIGHT CIRCLE */}
+            <div className="relative -ml-10 h-[20rem] w-[20rem] rounded-full bg-black">
+
+              {/* Ring */}
+              <div className="absolute inset-6 rounded-full border border-border/30 bg-white/90" />
+
+              {/* Center */}
+              <div className="absolute left-1/2 top-1/2 flex h-40 w-40 -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-full border border-border/40 bg-white shadow-sm">
+                <ShieldCheck className="mb-4 h-10 w-10 text-primary" />
+
+                <p className="font-mono text-sm uppercase tracking-[0.2em] text-foreground">
+                  Receipts
+                </p>
+              </div>
+
+              
+            </div>
+
+
+          </div>
+
+        </div>
+
+        {/* Bottom grid */}
+        <div className="mt-24 flex flex-col p-2 rounded-3xl border border-border/40 bg-border/20 bg-white p-10 gap-5">
+          <p className="text-primary uppercase text-lg tracking-widest text-center font-mono">Built for real world use</p>
+          <div className="grid gap-px overflow-hidden md:grid-cols-2 lg:grid-cols-5">
+
+            {[
+              {
+                title: "Operational Receipts",
+                description:
+                  "Proof of work, value, and payment completion.",
+                icon: ShieldCheck,
+              },
+              {
+                title: "Merchant Controlled",
+                description:
+                  "Issuance and redemption logic stay fully configurable.",
+                icon: User,
+              },
+              {
+                title: "Automation Ready",
+                description:
+                  "Trigger workflows, credits, and backend actions.",
+                icon: Workflow,
+              },
+              {
+                title: "Powered by Lightning",
+                description:
+                  "Issued directly from Lightning payment events.",
+                icon: Zap,
+              },
+              {
+                title: "Nostr anchoring",
+                description:
+                  "Metadata published on Nostr providing verifiable provenance.",
+                icon: Radio,
+              },
+            ].map((item) => (
               <div
-                key={item.label}
-                className={`group flex items-center gap-6 h-full rounded-2xl border border-border/40 bg-background p-6 transition-all duration-700 hover:border-border/80 hover:shadow-lg md:p-8 ${isInView ? "translate-x-0 opacity-100" : "-translate-x-6 opacity-0"}`}
-                style={{ transitionDelay: isInView ? `10ms` : "0ms" }}
+                key={item.title}
+                className="p-8 border-r border-border/40 last:border-0"
               >
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary/8 ring-1 ring-primary/10 transition-all duration-300 group-hover:bg-primary/12 group-hover:ring-primary/20">
+                <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/8 ring-1 ring-primary/10">
                   <item.icon className="h-5 w-5 text-primary" />
                 </div>
-                <p className="text-[15px] font-medium text-foreground md:text-base">{item.label}</p>
+
+                <h4 className="text-base font-semibold text-foreground">
+                  {item.title}
+                </h4>
+
+                <p className="mt-3 text-[15px] leading-[1.7] text-muted-foreground">
+                  {item.description}
+                </p>
               </div>
             ))}
           </div>
+        </div>
 
-          {/* Facts card - tall, spanning the right */}
-          <div
-            className={`overflow-hidden rounded-2xl border border-border/40 bg-background lg:col-span-7 transition-all duration-1000 delay-300 ${isInView ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"}`}
-          >
-            <div className="border-b border-border/40 px-8 py-5 md:px-10 md:py-6">
-              <p className="font-mono text-[10px] font-medium tracking-[0.2em] text-muted-foreground/50 uppercase">What this means in practice</p>
-            </div>
-            <div className="flex flex-col">
-              {facts.map((fact, i) => (
-                <div
-                  key={fact}
-                  className={`flex items-start gap-4 px-8 py-5 md:px-10 md:py-6 ${i < facts.length - 1 ? "border-b border-border/20" : ""}`}
-                >
-                  <div className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
-                  <p className="text-[15px] leading-[1.7] text-foreground/80">{fact}</p>
-                </div>
-              ))}
-            </div>
+        {/* Footer note */}
+        <div className="mt-14 flex justify-center">
+          <div className="inline-flex items-center gap-3 rounded-full  bg-primary/5 px-6 py-3">
+            <Ban className="h-4 w-4 text-primary" />
+
+            <p className="text-sm text-muted-foreground">
+              Not trading. Not speculation.
+              <span className="ml-1 font-medium text-primary">
+                Purely operational.
+              </span>
+            </p>
           </div>
         </div>
       </div>
-    </section>
+
+    </section >
   )
 }

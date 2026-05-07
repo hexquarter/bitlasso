@@ -49,7 +49,7 @@ export function HeroSection() {
                             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
                             <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
                         </span>
-                        <span className="font-mono text-[11px] font-medium tracking-[0.15em] text-muted-foreground uppercase">Open-Source. Programmable. Built on Lightning & Nostr.</span>
+                        <span className="font-mono text-[11px] font-medium tracking-[0.15em] text-muted-foreground uppercase">Accept sats instantly</span>
                     </div>
                 </div>
 
@@ -77,11 +77,12 @@ export function HeroSection() {
                         Turn work into
                         <br />
                         <span className="italic text-primary">repeating</span>
-                        <br />revenue—instantly
+                        <br />revenue
                     </h1>
 
                     <p className="mt-8 max-w-lg text-pretty text-lg leading-[1.7] text-muted-foreground lg:mt-10 lg:text-xl">
-                        Self-custodial wallet with Lightning checkout and loyalty. Built for humans and machines.
+                        Self-custodial Lightning checkout for apps, APIs, and agents.
+                        Self-custodial Lightning checkout with programmable payments and built-in rewards loops.
                     </p>
 
                     <div className="animate-fade-up opacity-0 delay-200 right-0 top-1/2 lg:hidden -translate-y-1/2 ">
@@ -101,20 +102,13 @@ export function HeroSection() {
                         </div>
                     </div>
 
-                    <div className="lg:mt-10 flex flex-col gap-4">
+                    <div className="lg:mt-10 flex flex-col">
                         <Link
                             to="/app"
-                            className="group inline-flex items-center gap-3 rounded-full bg-foreground px-8 py-4 text-[15px] font-medium text-background transition-all duration-300 hover:shadow-lg hover:shadow-foreground/10"
+                            className="flex items-center gap-3 rounded-full bg-foreground px-8 py-4 text-[15px] font-medium text-background transition-all duration-300 hover:shadow-lg hover:shadow-foreground/10 "
                         >
-                            Create your self-custodial checkout — $1 per payment
+                            Create your checkout
                             <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-                        </Link>
-                        <Link
-                            to="#how-it-works"
-                            className="inline-flex items-center gap-2 px-4 py-4 text-[15px] font-medium text-muted-foreground transition-colors duration-300 hover:text-foreground"
-                        >
-                            See how it works
-                            <ArrowRight className="h-3.5 w-3.5" />
                         </Link>
                     </div>
                 </div>

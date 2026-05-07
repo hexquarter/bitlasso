@@ -5,46 +5,45 @@ import { useInView } from "@/hooks/use-in-view"
 const reasons = [
   {
     icon: Clock,
-    title: "Checkout speed that feels instant",
+    title: "Instant checkout UX",
     description:
-      "Lightning settles payments in seconds, making checkout feel immediate. On-chain Bitcoin is too slow and uncertain for real-time commerce.",
+      "Lightning enables payments that feel immediate. No confirmation delays, no uncertain settlement windows.",
   },
   {
     icon: Lock,
-    title: "Single-use invoices for clean checkout flows",
-    description:
-      "Each Lightning invoice is tied to one payment only. That makes checkout deterministic: no reuse, no ambiguity, no double-spend risk at the application layer.",
+    title: "Deterministic invoices",
+    description: "Each invoice is single-use and tied to a specific payment. Without ambiguity and application-layer risk."
   },
   {
     icon: Shield,
-    title: "No waiting for confirmations",
+    title: "No settlement friction",
     description:
-      "Bitcoin on-chain requires block confirmations and introduces UX friction. Lightning removes confirmation latency entirely for end-user payments.",
+    "Bitcoin on-chain introduces delay and UX uncertainty. Lightning removes confirmations from the user flow entirely."
   },
   {
     icon: Globe,
-    title: "Global payments without payment rail complexity",
+    title: "Internet-native payments",
     description:
-      "Lightning abstracts away banking rails and regional fragmentation. One integration works everywhere without relying on card networks or bank settlement windows.",
+    "Lightning removes reliance on banking rails and card networks. One integration works globally across apps, APIs, and services."
   },
   {
     icon: Shield,
-    title: "Bitcoin as settlement, Lightning as execution",
+    title: "Bitcoin as base layer, Lightning as runtime",
     description:
-      "Bitcoin remains the base settlement layer for finality. Lightning is the execution layer optimized for high-frequency checkout flows—not a replacement, but the right layer for payments.",
+    "Bitcoin secures final settlement. Lightning executes transactions at scale."
   },
   {
     icon: Lock,
-    title: "Built for machine-native checkout (L402-ready)",
+    title: "Built for programmable payments",
     description:
-      "Lightning enables programmable, API-native payments. Perfect for automated checkout flows, AI agents, and instant pay-per-request systems.",
+    "Lightning enables API-native payments and L402-style flows. Ideal for automated systems, agents, and usage-based billing."
   },
 ]
 
 const comparison = {
   bitcoin: [
     "Minutes to hours settlement time",
-    "Variable confirmation delays",
+    "Confirmation delays",
     "On-chain fees for every payment",
     "Poor UX for checkout flows",
     "Not optimized for high-frequency payments",
@@ -54,7 +53,7 @@ const comparison = {
     "Instant payment confirmation UX",
     "Low routing-based fees",
     "Optimized for checkout flows",
-    "Designed for high-frequency transactions",
+    "Built for high-frequency transactions",
   ],
 }
 
@@ -71,24 +70,25 @@ export function WhyLightningSection() {
 
         {/* Header */}
         <div
-          className={`mb-24 transition-all duration-1000 ${
-            isInView ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
-          }`}
+          className={`mb-24 transition-all duration-1000 ${isInView ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
+            }`}
         >
           <p className="mb-5 font-mono text-[11px] font-medium tracking-[0.2em] text-primary uppercase">
             Why Lightning
           </p>
 
           <h2 className="max-w-4xl font-serif text-[clamp(2rem,4.5vw,3.75rem)] font-normal leading-[1.1] tracking-tight text-black">
-            Bitcoin scaled for instant, private payments
+            Bitcoin is settlement. Lightning is execution.
           </h2>
+          <p className="mt-6 max-w-xl text-pretty text-lg leading-[1.7] text-muted-foreground">
+            Bitcoin provides final settlement. <br />Lightning turns it into a real-time payment network for checkout flows.
+          </p>
         </div>
 
         {/* Comparison */}
         <div
-          className={`mb-20 overflow-hidden rounded-2xl border border-border/40 bg-card transition-all duration-1000 delay-200 ${
-            isInView ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
-          }`}
+          className={`mb-20 overflow-hidden rounded-2xl border border-border/40 bg-card transition-all duration-1000 delay-200 ${isInView ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
+            }`}
         >
           <div className="grid md:grid-cols-2">
 
@@ -144,13 +144,11 @@ export function WhyLightningSection() {
             return (
               <div
                 key={reason.title}
-                className={`group relative overflow-hidden rounded-2xl border border-border/40 bg-card p-8 transition-all duration-700 hover:border-border/80 hover:shadow-lg md:p-10 ${
-                  spans[i]
-                } ${
-                  isInView
+                className={`group relative overflow-hidden rounded-2xl border border-border/40 bg-card p-8 transition-all duration-700 hover:border-border/80 hover:shadow-lg md:p-10 ${spans[i]
+                  } ${isInView
                     ? "translate-y-0 opacity-100"
                     : "translate-y-6 opacity-0"
-                }`}
+                  }`}
                 style={{
                   transitionDelay: isInView ? `${500 + i * 120}ms` : "0ms",
                 }}

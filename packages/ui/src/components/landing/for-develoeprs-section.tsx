@@ -4,24 +4,24 @@ import { useInView } from '@/hooks/use-in-view'
 
 const features = [
   {
-    icon: Code2,
-    title: 'Decentralization authentication',
-    description: 'NIP-98 powered authentication for Nostr, designed for cryptographic trust and programmable workflows at scale.',
+    icon: Zap,
+    title: 'Payments as a programmable API primitive',
+    description: 'Lightning invoices are your entry point into the system. Create payment requests via API and attach them to any workflow, service, or agent.',
   },
   {
-    icon: Zap,
-    title: 'Real-time webhooks',
-    description: 'Payment events hit your backend immediately. Guaranteed delivery. Cryptographic signatures for verification.',
+    icon: Code2,
+    title: 'Authentication built for cryptographic systems',
+    description: 'NIP-98 based authentication enables signed requests and verifiable identity for Nostr-native and API-based workflows.',
   },
   {
     icon: Database,
-    title: 'Programmable payment workflows',
-    description: 'Turn a Lightning payment into workflow execution—mint credits, sync databases, and trigger external APIs automatically.',
+    title: 'Turn payments into workflows',
+    description: 'A Lightning payment can trigger any backend action: issue credits, update databases, call external APIs, trigger agent execution. Payments become execution signals, not just transactions.',
   },
   {
     icon: GitBranch,
-    title: 'Built for agentic',
-    description: 'Invoicing and payment flows for agent-driven work via API or autonomous agents.',
+    title: 'Built for agentic systems',
+    description: 'Designed for AI agents and autonomous systems that both: initiate payments, respond to payment events, execute workflows based on settlement state.',
   },
 ]
 
@@ -69,37 +69,26 @@ export function ForDevlopersSection() {
           })}
         </div>
 
-        {/* Code sample teaser */}
         <div
-          className={`mt-24 overflow-hidden rounded-2xl border border-border/40 bg-muted/30 p-8 transition-all duration-1000 delay-500 md:p-12 ${isInView ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}
-        >
-          <p className="mb-6 font-mono text-[11px] font-medium tracking-[0.2em] text-muted-foreground/60 uppercase">
-            Example: Create invoice & trigger agent
-          </p>
-          <pre className="overflow-x-auto text-[13px] leading-relaxed text-muted-foreground/70">
-{`// POST /payment-request
-{
-  body: {
-    amount: 1000,
-    items: [
-      { 
-        title: 'Consulting session', 
-        description: '1 hour of consulting', 
-        amount: 1000
-      }
-    ]
-  }
-  headers: {
-    'Authorization': 'Nostr eyJpZCI6ImZlOTY0ZTc1ODkwMzM2MGY...; L402 9fscasfd:11090fdsf'
-  }
-}
+          className={`mt-10 overflow-hidden rounded-2xl border border-border/40 bg-muted/30 p-8 transition-all duration-1000 delay-500 md:p-4 ${isInView ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}
+        ><pre className="overflow-x-auto text-[13px] leading-relaxed text-muted-foreground/70">
+            {`
+// Lightning payments in a few lines of code
 
-// Automatic flow:
-// 1. Invoice created & sent to client
-// 2. Client pays over Lightning
-// 3. Bitlasso posts to your webhook (from your settings)
-// 4. Your agent receives payment proof
-// All in < 10 seconds`}
+import { initializeWallet } from "@bitlasso/sdk"
+
+const wallet = await initializeWallet({
+  seed: {type: 'mnemonic', mnemonic: ''},
+  breezApiKey: ''
+})
+
+const paymentRequest = await publishPaymentRequest(wallet, {
+  items: [
+    { title: "Consulting session", amount: 100 }
+  ],
+  discountRate: 10
+})
+            `}
           </pre>
         </div>
       </div>

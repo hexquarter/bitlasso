@@ -7,27 +7,27 @@ import { useInView } from "@/hooks/use-in-view"
 const benefits = [
   {
     icon: Network,
-    title: "No single point of failure",
+    title: "Open coordination layer",
     description:
-      "Bitlasso runs on Nostr, a decentralized network. Your business isn't dependent on any company staying online or in business.",
+      "Your business does not rely on a single company staying online, operating infrastructure, or maintaining access to your data. Nostr enables open communication between merchants, clients, agents, and services without centralized intermediaries.",
   },
   {
     icon: Users,
-    title: "You control your data",
+    title: "Portable merchant identity",
     description:
-      "Your transaction history and client relationships aren't locked in a proprietary database. You own and can export everything.",
+      "Your merchant profile, payment metadata, and reputation are portable across any Nostr-enabled application. No regional banking rails, account restrictions, or geographic limitations. Lightning + Nostr works anywhere internet access exists.",
   },
   {
     icon: Zap,
-    title: "Instant everywhere",
+    title: "Built for machine-native systems",
     description:
-      "Decentralized infrastructure means no geographic restrictions. Send payments, settle credits, and manage clients from anywhere.",
+      "Agents and automated services can authenticate, communicate, and coordinate payments using open cryptographic standards.",
   },
   {
     icon: Share2,
-    title: "Portable business",
+    title: "Your data stays yours",
     description:
-      "Switch tools without losing your history. Your identity and credits move with you across any Nostr-enabled platform.",
+      "Transaction metadata, customer relationships, and operational history remain exportable and under merchant control.",
   },
 ]
 
@@ -42,10 +42,11 @@ export function DecentralizationSection() {
         <div className={`mb-24 transition-all duration-1000 ${isInView ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"}`}>
           <p className="mb-5 font-mono text-[11px] font-medium tracking-[0.2em] text-primary uppercase">Decentralized</p>
           <h2 className="max-w-4xl font-serif text-[clamp(2rem,4.5vw,3.75rem)] font-normal leading-[1.1] tracking-tight text-foreground">
-            Built on Nostr for freedom
+            Built on Nostr for portable commerce
           </h2>
           <p className="mt-6 max-w-xl text-pretty text-lg leading-[1.7] text-muted-foreground">
-            Bitlasso is built on Nostr, an open protocol where no single company controls your data. Think of it like email: your identity and history belong to you, not the platform.
+            Bitlasso uses Nostr as its coordination and identity layer — an open protocol where merchants own their identity, payment history, and client relationships.
+            No platform lock-in. No proprietary network effects.
           </p>
         </div>
 
@@ -68,15 +69,20 @@ export function DecentralizationSection() {
 
         {/* Bottom callout */}
         <div
-          className={`mt-20 rounded-2xl border border-primary/20 bg-primary/5 p-8 md:p-12 transition-all duration-1000 delay-500 ${isInView ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"}`}
+          className={`mt-20 flex flex-col gap-2 rounded-2xl border border-primary/20 bg-primary/5 p-8 md:p-12 transition-all duration-1000 delay-500 ${isInView ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"}`}
         >
-          <p className="text-[15px] leading-[1.8] text-foreground/80">
-            <span className="font-semibold text-foreground">What's Nostr?</span> It's a simple, open standard that lets you own your identity and data. <br />
-            Like Bitcoin for communication and relationships, Nostr gives you total control. <br />
-            You own your merchant profile, your client list, your transaction history — Bitlasso can't lock you in or shut you down.
-          </p>
+          <p>Why Nostr?</p>
+          <p className="text-[15px] leading-[1.8] text-foreground/80"> Nostr is an open protocol for identity and communication.</p>
+          <p className="text-[15px] leading-[1.8] text-foreground/80"> Like Bitcoin removes centralized control from money, Nostr removes centralized control from identity, coordination, and relationships. </p>
+          <p className="text-[15px] leading-[1.8] text-foreground/80"> Bitlasso uses Nostr so merchants can: </p>
+          <ul className="list-disc ml-10 text-[15px] leading-[1.8] text-foreground/80">
+            <li>own their business identity</li>
+            <li>move across tools freely</li>
+            <li>integrate with open ecosystems</li>
+            <li>avoid platform lock-in</li>
+          </ul>
         </div>
       </div>
-    </section>
+    </section >
   )
 }

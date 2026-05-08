@@ -81,7 +81,6 @@ export function HeroSection() {
                     </h1>
 
                     <p className="mt-8 max-w-lg text-pretty text-lg leading-[1.7] text-muted-foreground lg:mt-10 lg:text-xl">
-                        Self-custodial Lightning checkout for apps, APIs, and agents.
                         Self-custodial Lightning checkout with programmable payments and built-in rewards loops.
                     </p>
 

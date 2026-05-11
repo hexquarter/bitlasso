@@ -59,6 +59,15 @@ export const PaymentCertificate: React.FC<{ paymentRequest: PaymentRequest, btcA
                         <ExternalLink className="h-4" />
                     </a>
                 </div>
+                <div className="flex flex-col gap-2 items-center">
+                    <p className="text-sm text-neutral-500">
+                        Invoice
+                    </p>
+                    <a href={`https://lndecode.com/?invoice=${paymentRequest.lightningInvoice}`} target="_blank" className="flex items-center gap-2 font-semibold">
+                        {shortenAddress(paymentRequest.lightningInvoice)}
+                        <ExternalLink className="h-4" />
+                    </a>
+                </div>
             </div>
         </div>
     )

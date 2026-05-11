@@ -262,10 +262,10 @@
     better-sqlite3 "^12.2.0"
     pg "^8.18.0"
 
-"@breeztech/breez-sdk-spark@^0.13.9-debug":
-  version "0.13.9-debug"
-  resolved "https://registry.npmjs.org/@breeztech/breez-sdk-spark/-/breez-sdk-spark-0.13.9-debug.tgz"
-  integrity sha512-yyzMnr9KbuDnr0qOyPVuQFY3RzXKiDtaITcPM8eWsAPIPQ97Johet1juKA+U/Zg6878ue+1WVvx9dUC1/L/06A==
+"@breeztech/breez-sdk-spark@^0.14.0":
+  version "0.14.0"
+  resolved "https://registry.yarnpkg.com/@breeztech/breez-sdk-spark/-/breez-sdk-spark-0.14.0.tgz#357ccc2e92c26a8ddcf12e3ff41d05f579c00143"
+  integrity sha512-+j8Bz5e2FUH1DPpLCl19MrED2kD2nOgpH/7JKD/PP4f2mlUfE0fCH1i0greVDiIq0EAN2muq0CW5+aCm5OY6QA==
   optionalDependencies:
     better-sqlite3 "^12.2.0"
     pg "^8.18.0"

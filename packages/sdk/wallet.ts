@@ -23,7 +23,7 @@ import type {
     BreezEvent
 } from './types';
 import { SDKError } from './types';
-import { connectViaNsec, deriveNsec, fetchSettings, registerSettings, type NostrConnection } from "./nostr";
+import { connectViaNsec, deriveNsec, fetchSettings, registerSettings, RelayConfig, type NostrConnection } from "./nostr";
 import { uint8ArrayToNum } from "./utils";
 import { bytesToHex } from "nostr-tools/utils";
 
@@ -205,6 +205,10 @@ export const initializeWallet = async (auth: AuthConfig, _nostrConnection?: Nost
         }
         catch (e) {
             console.error('failed to process unclaimed deposits', e)
+        }
+
+        if (!auth.relayConfig) {
+            auth.relayConfig = new RelayConfig()
         }
 
         let settings = await fetchSettings(auth.relayConfig, instance)

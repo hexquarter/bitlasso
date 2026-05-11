@@ -229,7 +229,7 @@ export type AuthMethod = { type: 'mnemonic', mnemonic: string } | { type: 'nsec'
 export interface AuthConfig {
     seed: Seed;
     breezApiKey: string;
-    relayConfig: RelayConfig
+    relayConfig?: RelayConfig
 }
 
 /**

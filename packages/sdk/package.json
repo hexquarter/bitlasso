@@ -36,7 +36,7 @@
     "url": "https://github.com/hexquarter/bitlasso"
   },
   "dependencies": {
-    "@breeztech/breez-sdk-spark": "^0.13.9-debug",
+    "@breeztech/breez-sdk-spark": "^0.14.0",
     "@buildonspark/spark-sdk": "^0.7.17",
     "@noble/curves": "^2.2.0",
     "@scure/bip32": "^2.2.0",

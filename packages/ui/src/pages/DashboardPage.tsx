@@ -1,26 +1,20 @@
-import { NewTokenForm } from "@/components/dashboard/new-token-form"
-
-import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useWallet } from "@/hooks/use-wallet"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
 
 import { WalletCard } from "@/components/dashboard/wallet-card"
-import { IssueReceiptForm, type IssueReceiptData } from "@/components/dashboard/issue-receipt"
 import { PaymentRequestForm, type PaymentRequestData } from "@/components/dashboard/payment-request"
-import { ReceiptTable, type Receipt } from "@/components/dashboard/receipt-table"
 import { PaymentTable, type PaymentRequestItem } from "@/components/dashboard/payment-table"
 import { type Asset } from "@/components/dashboard/send"
 import { addTokenBalance, send } from "@/lib/utils"
-import type { ReceiptMetadataData } from "@/components/dashboard/receipt-metadata-form"
 import { Skeleton } from "@/components/ui/skeleton"
-import { AlertTriangleIcon, Coins, ExternalLink, FileText, MoreHorizontal, Pickaxe, Plus, RefreshCcw, Rocket, Wallet2, Zap } from "lucide-react"
+import { AlertTriangleIcon, FileText, MoreHorizontal, Plus, Wallet2, Zap } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { DropdownMenu, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { RevenueChart } from "@/components/dashboard/revenue-chart"
-import { Spinner } from "@/components/ui/spinner"
 
-import { Client, type Wallet, type BreezPayment, type SparkPayment, type TokenBalanceMap, type TokenMetadata, type TokenStats, fetchSettings, fetchPaymentsRequest, listReceipts, publishReceiptMetadata, subscribePayment, subscribeRedeem, type OrgSettings, registerSettings, RelayConfig } from "@bitlasso/sdk"
+import { Client, type Wallet, type BreezPayment, type SparkPayment, type TokenBalanceMap, type TokenMetadata, fetchSettings, fetchPaymentsRequest, subscribePayment, subscribeRedeem, type OrgSettings, RelayConfig } from "@bitlasso/sdk"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { useNavigate } from "react-router"
 import { IconMessageDollar } from "@tabler/icons-react"
@@ -36,20 +30,15 @@ export const DashboardPage = () => {
 
     const hasSecuredMnemonic = localStorage.getItem('BITLASSO_SECURED_MNEMONIC') || 'false'
 
-    const [tokenMetadataLoading, setTokenMetadataLoading] = useState(true)
     const [satsBalance, setSatsBalance] = useState(0n)
     const [tokenBalances, setTokenBalances] = useState<TokenBalanceMap | undefined>(undefined)
-    const [issuanceStats, setIssuanceStats] = useState<TokenStats | undefined>(undefined)
-    const [tokenMetadata, setTokenMetadata] = useState<TokenMetadata | undefined>(undefined)
     const [addresses, setAddresses] = useState<{ btc: string, ln: string, spark: string } | null>(null)
     const [price, setPrice] = useState(0)
     const [paymentRequests, setPaymentRequests] = useState<PaymentRequestItem[]>([])
-    const [receipts, setReceipts] = useState<Receipt[]>([])
     const [walletHistory, setWalletHistory] = useState<SparkPayment[]>([])
     const [notifSettingAlert, setNotifSettingAlert] = useState(false)
     const [walletLoading, setWalletLoading] = useState(true)
     const [paymentRequestLoading, setPaymentRequestLoading] = useState(true)
-    const [receiptLoading, setReceiptLoading] = useState(true)
     const [walletHistoryLoading, setWalletHistoryLoading] = useState(true)
     const [isSyncing, setIsSyncing] = useState(false)
     const [orgSettings, setOrgSettings] = useState<OrgSettings | undefined>(undefined)
@@ -60,6 +49,7 @@ export const DashboardPage = () => {
     useEffect(() => {
         if (!wallet) return
 
+
         // Only attach listeners once per wallet instance
         if (!listenersAttached.current) {
             const refreshBalance = async () => {
@@ -67,15 +57,6 @@ export const DashboardPage = () => {
 
                 const payments = await wallet.listPayments()
                 setWalletHistory(payments)
-
-                // Use a callback form of setState to read current tokenMetadata
-                // instead of capturing stale closure value
-                setTokenMetadata((prev) => {
-                    if (prev) {
-                        void refreshIssuanceStats(wallet, prev)
-                    }
-                    return prev
-                })
             }
             const onPaymentPending = (payment: BreezPayment) => {
                 setIsSyncing(true)
@@ -167,26 +148,8 @@ export const DashboardPage = () => {
         setTokenBalances(balance.tokenBalances)
     }
 
-    const refreshIssuanceStats = async (wallet: Wallet, metadata: TokenMetadata) => {
-        const stats = await wallet.getTokenStats(metadata)
-        if (stats) {
-            setIssuanceStats(stats)
-        }
-    }
-
     const fetchData = async (wallet: Wallet) => {
-        try {
-            const metadata = await wallet.getTokenMetadata().catch(() => null)
-            if (metadata) {
-                setTokenMetadata(metadata)
-                void (async () => await refreshIssuanceStats(wallet, metadata))()
-            }
-            setTokenMetadataLoading(false)
-        }
-        catch (_e) {
-            setTokenMetadataLoading(false)
-        }
-
+        console.log(wallet.identityPubkey)
         void (async () => {
             const [btc, spark, ln] = await Promise.all([
                 wallet.getBitcoinAddress(),
@@ -200,8 +163,6 @@ export const DashboardPage = () => {
             console.log('Refreshing payment requests and receipts...')
             await refreshPaymentRequests()
             setPaymentRequestLoading(false)
-            await refreshReceipts()
-            setReceiptLoading(false)
         })()
 
         void (async () => {
@@ -261,87 +222,8 @@ export const DashboardPage = () => {
         })()
     }
 
-    const refreshReceipts = async () => {
-        if (!wallet) return
-
-        const receipts = await listReceipts(relayConfig, wallet)
-        setReceipts(receipts)
-    }
-
-    const handleNewToken = async ({ name, symbol }: { name: string, symbol: string }) => {
-        console.log('Creating token', name, symbol)
-        if (!wallet) {
-            return
-        }
-
-        try {
-            const { tokenId } = await wallet.createToken(name, symbol, 0n, 1, false)
-            console.log('Token created with ID:', tokenId)
-
-            const settings = await fetchSettings(relayConfig, wallet)
-            if (settings) {
-                settings.redeemTokenId = tokenId
-                await registerSettings(relayConfig, wallet, settings)
-            }
-
-            const metadata = await wallet.getTokenMetadata()
-            setTokenMetadata(metadata)
-            setIssuanceStats({ mints: 0, burns: 0, circulating: 0, transfers: 0 })
-            void (() => posthog?.capture('loyalty_token_created', { token_name: name, token_symbol: symbol }))()
-        }
-        catch (e) {
-            const error = e as Error
-            console.error(error.message)
-            toast.error(error.message)
-        }
-    }
-
-    const handleIssueReceipt = async (data: IssueReceiptData) => {
-        if (!wallet || !tokenMetadata) return
-
-        const response = await wallet?.mintTokens(BigInt(data.mintableTokens) * BigInt(10 ** tokenMetadata.decimals))
-        if (!response) return
-        console.log('Issued receipt with tx ID:', response?.id)
-
-        await publishReceiptMetadata(relayConfig, wallet,
-            response?.id,
-            data.mintableTokens,
-            response.timestamp,
-            data.description,
-            data.recipientAddress,
-            data.paymentId
-        )
-
-        if (data.recipientAddress && data.recipientAddress != '') {
-            const asset = { name: tokenMetadata.name, symbol: tokenMetadata.symbol, identifier: tokenMetadata.identifier } as Asset
-            const id = await send(wallet, asset, data.mintableTokens, data.recipientAddress, 'spark')
-            console.log('Token transfered to recipient:', id)
-        }
-
-        setReceipts((prevReceipts) => [
-            {
-                date: response.timestamp,
-                amount: data.mintableTokens,
-                description: data.description,
-                recipient: data.recipientAddress,
-                paymentId: data.paymentId,
-                transaction: response.id
-            },
-            ...prevReceipts
-        ])
-
-        void (() => posthog?.capture('receipt_issued', {
-            amount: data.mintableTokens,
-            has_recipient: !!(data.recipientAddress && data.recipientAddress !== ''),
-            token_symbol: tokenMetadata?.symbol,
-        }))()
-        await refreshIssuanceStats(wallet, tokenMetadata as TokenMetadata)
-        setTokenBalances((prev) => addTokenBalance(prev, tokenMetadata, data.mintableTokens))
-    }
-
     const handlePaymentRequest = async (data: PaymentRequestData) => {
-        if (!wallet || !tokenMetadata || !settings) {
-            console.log(wallet, tokenMetadata, tokenBalances, settings)
+        if (!wallet) {
             return
         }
 
@@ -350,42 +232,27 @@ export const DashboardPage = () => {
             discountRate: data.discountRate
         }
         const client = new Client({ dev: import.meta.env.DEV });
-        const response = await client.publishPaymentRequest(wallet, paymentRequest)
-        console.log(`Payment request response`, response)
+        try {
+            const response = await client.publishPaymentRequest(wallet, paymentRequest)
+            console.log(`Payment request response`, response)
 
-        await refreshPaymentRequests()
-        void (() => posthog?.capture('payment_request_created', {
-            amount_usd: data.items.reduce((sum, item) => sum + item.amount, 0),
-            discount_rate: data.discountRate,
-            paid_with_credits: !data.feeSats,
-        }))()
-        toast.success('Payment request created successfully')
+            await refreshPaymentRequests()
+            void (() => posthog?.capture('payment_request_created', {
+                amount_usd: data.items.reduce((sum, item) => sum + item.amount, 0),
+                discount_rate: data.discountRate,
+                paid_with_credits: !data.feeSats,
+            }))()
+            toast.success('Payment request created successfully')
+        }
+        catch (e) {
+            const error = e as Error
+            toast.error(error.message)
+        }
     }
 
     const handleSend = async (method: 'spark' | 'lightning' | 'bitcoin', asset: Asset, amount: number, recipient: string) => {
         if (!wallet) return
         await send(wallet, asset, amount, recipient, method)
-    }
-
-    const handleReceiptMetadataChange = async (data: ReceiptMetadataData) => {
-        if (!wallet) return
-
-        const { amount, recipient } = receipts.find(r => r.transaction == data.transactionId) as Receipt
-        await publishReceiptMetadata(relayConfig, wallet,
-            data.transactionId,
-            amount,
-            new Date(),
-            data.description,
-            recipient,
-            data.paymentId
-        )
-
-        await new Promise<void>((r) => {
-            setTimeout(async () => {
-                await refreshReceipts()
-                r()
-            }, 1000)
-        })
     }
 
     const handlePurchaseCredits = async (amount: number) => {
@@ -436,7 +303,7 @@ export const DashboardPage = () => {
         <div className="flex flex-col w-full gap-10">
             <div className="flex flex-col gap-2">
                 <div className="flex flex-col gap-2 justify-between">
-                    <h1 className="text-4xl font-serif font-normal text-foreground flex md:items-center justify-between md:flex-row flex-col">Dashboard {tokenMetadataLoading && <p className="text-xs flex items-center font-mono uppercase text-primary"><span>Syncing wallet data...</span> <Spinner className="ml-2 text-primary" /></p>}</h1>
+                    <h1 className="text-4xl font-serif font-normal text-foreground flex md:items-center justify-between md:flex-row flex-col">Dashboard</h1>
                     <h2 className="text-1xl font-light text-muted-foreground">Turn paid work into Bitcoin-anchored receipts that reward repeat clients.</h2>
                 </div>
                 {hasSecuredMnemonic == 'false' && <Alert className="py-5">
@@ -462,7 +329,7 @@ export const DashboardPage = () => {
                 </Alert>}
             </div>
 
-            {(!tokenMetadataLoading && tokenMetadata) && <div className="grid lg:grid-cols-3 gap-2">
+            <div className="grid lg:grid-cols-3 gap-2">
                 <Card className="col-span-1">
                     <CardHeader className="font-mono uppercase tracking-wider text-gray-500 text-xs flex justify-between items-center">
                         <div className="flex items-center gap-2">
@@ -495,36 +362,6 @@ export const DashboardPage = () => {
                             <span className="text-2xl font-semibold">{paymentRequests.length}</span>
                             <span className="text-xs text-muted-foreground">{pendingPayments} pendings</span>
                         </CardContent>}
-                    </Card>
-                    <Card className="flex-1">
-                        <CardHeader className="font-mono uppercase tracking-wider text-gray-500 text-xs flex justify-between items-center">
-                            <div className="flex items-center gap-2">
-                                <div className="bg-primary/10 p-3 rounded-full items-center"><Coins className="h-4 w-4 text-primary" /></div>
-                                Minted credits
-                            </div>
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <div className="flex gap-1 items-center">
-                                        <Button variant="ghost" className="h-8 w-8 p-0 rounded-full">
-                                            <MoreHorizontal className="h-4 w-4" />
-                                        </Button>
-                                    </div>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                    {tokenMetadata && <DropdownMenuItem onClick={() => window.open(`https://sparkscan.io/token/${tokenMetadata.identifier}`, '_blank')}>View details on explorer<ExternalLink /></DropdownMenuItem>}
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                        </CardHeader>
-                        {!issuanceStats && <CardContent className="flex flex-col gap-2">
-                            <Skeleton className="h-10 w-1/4" />
-                            <Skeleton className="h-10 w-1/4" />
-                        </CardContent>}
-                        {issuanceStats &&
-                            <CardContent className="flex flex-col gap-2">
-                                <span className="text-2xl font-semibold">{issuanceStats.mints} {tokenMetadata.symbol}</span>
-                                <span className="text-muted-foreground text-xs">{issuanceStats.burns} redeemed</span>
-                            </CardContent>
-                        }
                     </Card>
                 </div>
                 <div className="flex flex-col gap-2 col-span-1">
@@ -578,50 +415,9 @@ export const DashboardPage = () => {
 
                     </div>
                 </div>
-            </div>}
-            <div className="grid lg:grid-cols-2 gap-2">
-                {!tokenMetadataLoading && !tokenMetadata &&
-                    <Card className="flex flex-col justify-between lg:col-span-1">
-                        <CardHeader>
-                            <h2 className="border-primary/40 flex gap-2 font-serif font-light text-2xl">Set up your loyalty token</h2>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="flex flex-col text-sm gap-2 justify-between">
-                                <div className="bg-white border-1 border-border/40 p-4 rounded-lg group flex gap-2 items-center">
-                                    <div className="text-primary flex p-2 h-12 w-12 items-center justify-center rounded-2xl bg-primary/8 ring-1 ring-primary/10 transition-all duration-300 group-hover:bg-primary/12 group-hover:ring-primary/20">
-                                        <Rocket className="h-4" />
-                                    </div>
-                                    <div className="flex flex-col gap-1">
-                                        <p className="text-sm font-semibold tracking-tight text-card-foreground">Deploy a token</p>
-                                        <p className="text-muted-foreground text-xs">Issue receipts for completed work and enable client discounts.</p>
-                                    </div>
-                                </div>
-                                <div className="bg-white border-1 border-border/40 p-4 rounded-lg flex gap-2 items-center">
-                                    <div className="text-primary flex p-2 h-12 w-12 items-center justify-center rounded-2xl bg-primary/8 ring-1 ring-primary/10 transition-all duration-300 group-hover:bg-primary/12 group-hover:ring-primary/20">
-                                        <Pickaxe className="h-4" />
-                                    </div>
-                                    <div className="flex flex-col gap-1">
-                                        <p className="text-sm font-semibold tracking-tight text-card-foreground">Minting</p>
-                                        <p className="text-xs text-muted-foreground ">Each time you deliver a project, you can mint tokens as proof of completed work.</p>
-                                    </div>
-                                </div>
-                                <div className="bg-white border-1 border-border/40 p-4 rounded-lg flex gap-2 items-center">
-                                    <div className="text-primary flex p-2 h-12 w-12 items-center justify-center rounded-2xl bg-primary/8 ring-1 ring-primary/10 transition-all duration-300 group-hover:bg-primary/12 group-hover:ring-primary/20">
-                                        <RefreshCcw className="h-4" />
-                                    </div>
-                                    <div className="flex flex-col gap-1">
-                                        <p className="text-sm font-semibold tracking-tight text-card-foreground">Loyalty</p>
-                                        <p className="text-xs text-muted-foreground ">Those tokens can be redeemed for future discounts — encouraging repeated <span className="text-primary font-bold">loop of work</span>.</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </CardContent>
-                        <CardFooter>
-                            <NewTokenForm onSubmit={handleNewToken} />
-                        </CardFooter>
-                    </Card>
-                }
-                {!tokenMetadataLoading && wallet && <Card className="lg:col-span-1" id="payments">
+            </div>
+            <div className="grid 2xl:grid-cols-3 gap-2">
+                {wallet && <Card className="lg:col-span-2" id="payments">
                     <CardHeader className="flex flex-col">
                         <CardTitle className="flex lg:flex-row flex-col justify-between w-full gap-5">
                             <div className="flex flex-col lg:flex-row lg:justify-between lg:w-full gap-2">
@@ -663,48 +459,9 @@ export const DashboardPage = () => {
                                         redeemTx: r.redeemTx,
                                         settlementMode: r.settlementMode,
                                         sharingKey: r.sharingKey
-                                    }))}
-                                    onDeriveReceipt={handleIssueReceipt}
-                                    paymentRequests={paymentRequests}
-                                    receipts={receipts} />
+                                    }))} />
                             </div>
                         }
-                    </CardContent>
-                </Card>}
-                {(!tokenMetadataLoading && tokenMetadata) && <Card className="lg:col-span-1" id="receipts">
-                    <CardHeader className="flex flex-col">
-                        <CardTitle className="flex 2xl:flex-row flex-col justify-between w-full gap-10">
-                            <div className="flex flex-col lg:flex-row justify-between lg:w-full gap-5">
-                                <p className="text-2xl font-serif text-2xl font-light ">Receipts</p>
-                                <CardAction className="w-full lg:w-auto">
-                                    {receiptLoading && <Skeleton className="h-10 w-30" />}
-                                    {!receiptLoading && <IssueReceiptForm onSubmit={handleIssueReceipt} paymentRequests={paymentRequests} />}
-                                </CardAction>
-                            </div>
-                        </CardTitle>
-                        <CardDescription>Receipts issued for completed and paid work</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        {receiptLoading &&
-                            <div className="flex flex-col gap-2">
-                                {Array.from({ length: 5 }).map((_, index) => (
-                                    <div className="flex gap-4" key={index}>
-                                        <Skeleton className="h-10 flex-1" />
-                                        <Skeleton className="h-10 flex-1" />
-                                        <Skeleton className="h-10 flex-1" />
-                                        <Skeleton className="h-10 flex-1" />
-                                    </div>
-                                ))}
-                            </div>
-                        }
-                        <div className="md:max-w-full max-w-xs">
-                            {!receiptLoading && tokenMetadata &&
-                                <ReceiptTable
-                                    receipts={receipts}
-                                    paymentRequests={paymentRequests}
-                                    onMetadataChange={handleReceiptMetadataChange} />
-                            }
-                        </div>
                     </CardContent>
                 </Card>}
             </div>

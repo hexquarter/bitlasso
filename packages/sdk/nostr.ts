@@ -5,7 +5,7 @@ import { mnemonicToSeedSync } from "@scure/bip39";
 import { HDKey } from "@scure/bip32";
 
 import type { Wallet } from "./wallet";
-import type { OrgSettings, Receipt, SDKConfig, UserSettings, PaymentRequest } from "./types";
+import type { OrgSettings, SDKConfig, UserSettings, PaymentRequest } from "./types";
  
 const pool = new SimplePool({
     enablePing: true,
@@ -273,57 +273,6 @@ const fetchRedeemDetails = async (relayConfig: RelayConfig, requestId: string) =
     return { redeemAmount, transaction: redeemTransaction }
 }
 
-export const publishReceiptMetadata = async (relayConfig: RelayConfig, wallet: Wallet, transactionId: string, amount: number, createdAt: Date, description?: string, recipient?: string, paymentId?: string) => {
-    const event = {
-        kind: 30078,
-        content: JSON.stringify({
-            amount,
-            description,
-            recipient,
-            transactionId
-        }),
-        pubkey: wallet.nostrConnection.pubkey,
-        created_at: Math.floor(createdAt.getTime() / 1000),
-        tags: [
-            ["d", `bitlasso/receipt/${transactionId}`],
-            ["t", "bitlasso/receipt"]
-        ]
-    }
-
-    if (paymentId) {
-        event.tags.push(["e", paymentId, "", "payment-request"])
-    }
-
-    const signedEvent = await wallet.nostrConnection.sign(event);
-    await Promise.any(pool.publish(relayConfig.relays, signedEvent))
-    return signedEvent.id
-}
-
-export const listReceipts = async (relayConfig: RelayConfig, wallet: Wallet): Promise<Receipt[]> => {
-    const events = await fetchAndSync(relayConfig, {
-        kinds: [30078],
-        authors: [wallet.nostrConnection.pubkey],
-        "#t": ["bitlasso/receipt"]
-    });
-    if (events.length == 0) {
-        return []
-    }
-
-    return events.map(e => {
-        const { content, tags, created_at } = e
-        const { amount, description, recipient, transactionId } = JSON.parse(content)
-
-        return {
-            date: new Date(created_at * 1000),
-            amount,
-            description,
-            recipient,
-            transaction: transactionId,
-            paymentId: getTagByMarker(tags, "e", "payment-request"),
-        } as Receipt
-    })
-}
-
 export const getBitcoinPrice = async (relayConfig: RelayConfig, id: string): Promise<{ usdPrice: number, date: Date } | undefined> => {
     try {
         const events = await fetchAndSync(relayConfig, {
@@ -510,4 +459,16 @@ export const encryptPassphrase = (passphrase: string, nostrConnection: NostrConn
 export const decryptPassphrase = (encryptedPassphrase: string, nostrConnection: NostrConnection): string => {
     const conversationKey = nostrConnection.getConversationKey(nostrConnection.pubkey);
     return nip44.decrypt(encryptedPassphrase, conversationKey);
+}
+
+export const fetchEarnRequest = async (relayConfig: RelayConfig, requestId: string): Promise<{ sparkAddress: string } | undefined> => {
+    const events = await fetchAndSync(relayConfig, {
+        kinds: [30078],
+        "#d": [`bitlasso/earn/${requestId}`]
+    });
+    if (events.length == 0) {
+        return undefined
+    }
+
+    return JSON.parse(events[0].content) as { sparkAddress: string }
 }

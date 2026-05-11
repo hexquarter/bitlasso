@@ -243,8 +243,6 @@ export class Client {
       return signed;
     }, true, paymentRequest)
 
-    console.log(authToken)
-
     try {
       let response = await fetch(this.getApiUrl('/payment-request'), {
         method: 'POST',
@@ -314,6 +312,7 @@ export class Client {
           }
           // Fallback to lightning payment
           else if (macaroonMatch && invoiceMatch) {
+
             const macaroon = macaroonMatch[1];
             const invoice = invoiceMatch[1];
 
@@ -329,6 +328,7 @@ export class Client {
               }
               const onPaymentFailed = (error: any) => {
                 cleanup()
+                console.log(error)
                 reject(error)
               }
 
@@ -373,6 +373,36 @@ export class Client {
       if (error instanceof SDKError) throw error;
       throw new SDKError(
         `Network error while publishing payment request: ${error instanceof Error ? error.message : String(error)}`,
+        'NETWORK_ERROR'
+      );
+    }
+  }
+
+  /**
+   * Create earn intent to get minted BITL tokens for a payment request
+   * @param requestId Payment request ID
+   * @param address Spark address to receive BITL token
+   */
+  async publishEarnRequest(requestId: string, address: string) {
+    try {
+      let response = await fetch(this.getApiUrl(`/payment-request/${requestId}/earn/${address}`), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+      if (!response.ok) {
+        throw new SDKError(
+          `Failed to publish earn request: ${response.statusText}`,
+          'PUBLISH_EARN_REQUEST_FAILED',
+          response.status
+        );
+      }
+    }
+    catch (error) {
+      if (error instanceof SDKError) throw error;
+      throw new SDKError(
+        `Network error while publishing earn request: ${error instanceof Error ? error.message : String(error)}`,
         'NETWORK_ERROR'
       );
     }

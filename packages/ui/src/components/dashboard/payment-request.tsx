@@ -17,6 +17,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { ActivePayment } from "./activate-payment"
 import type { OrgSettings, Settings } from "@bitlasso/sdk"
+import { Label } from "../ui/label"
+import { Switch } from "../ui/switch"
 
 export type LineItem = {
     id: string
@@ -48,14 +50,16 @@ export const PaymentRequestForm: React.FC<Props> = ({ onSubmit, price, settings,
 
     const [items, setItems] = useState<LineItem[]>([{ id: '1', title: '', description: '', amount: 0 }])
     const [ready, setReady] = useState(false)
-    const [discountRate, setDiscountRate] = useState(10)
+    const [discountRate, setDiscountRate] = useState(0)
 
     const totalAmount = useMemo(() => items.reduce((sum, item) => sum + item.amount, 0), [items])
     const vatRate = useMemo(() => orgSettings?.vat || 0, [orgSettings])
 
+    const [allowDiscount, setAllowDiscount] = useState(false)
+
     const handleChangeAmount = (val: string, itemId: string) => {
         const amount = parseFloat(val)
-        const newItems = items.map(item => 
+        const newItems = items.map(item =>
             item.id === itemId ? { ...item, amount: Number.isNaN(amount) ? 0 : amount } : item
         )
         setItems(newItems)
@@ -63,7 +67,7 @@ export const PaymentRequestForm: React.FC<Props> = ({ onSubmit, price, settings,
     }
 
     const handleChangeTitle = (val: string, itemId: string) => {
-        const newItems = items.map(item => 
+        const newItems = items.map(item =>
             item.id === itemId ? { ...item, title: val } : item
         )
         setItems(newItems)
@@ -71,7 +75,7 @@ export const PaymentRequestForm: React.FC<Props> = ({ onSubmit, price, settings,
     }
 
     const handleChangeDescription = (val: string, itemId: string) => {
-        const newItems = items.map(item => 
+        const newItems = items.map(item =>
             item.id === itemId ? { ...item, description: val } : item
         )
         setItems(newItems)
@@ -91,7 +95,7 @@ export const PaymentRequestForm: React.FC<Props> = ({ onSubmit, price, settings,
     const handleDiscountChange = (val: string) => {
         const amount = parseInt(val)
         if (Number.isNaN(amount)) {
-            setDiscountRate(10)
+            setDiscountRate(0)
             return
         }
         setDiscountRate(amount)
@@ -120,8 +124,17 @@ export const PaymentRequestForm: React.FC<Props> = ({ onSubmit, price, settings,
         if (!open) {
             setItems([{ id: '1', title: '', description: '', amount: 0 }])
             setReady(false)
+            setAllowDiscount(false)
+            setDiscountRate(10)
         }
         setOpen(open)
+    }
+
+    const handleActiveDiscount = (value: boolean) => {
+        setAllowDiscount(value)
+        if (value && discountRate == 0) {
+            setDiscountRate(10)
+        }
     }
 
     return (
@@ -146,32 +159,32 @@ export const PaymentRequestForm: React.FC<Props> = ({ onSubmit, price, settings,
                             {items.map((item) => (
                                 <div key={item.id} className="flex gap-2 items-start">
                                     <div className="flex-1 flex flex-col gap-2">
-                                        <Input 
-                                            placeholder="Item title (e.g., 'Frontend delivery')" 
+                                        <Input
+                                            placeholder="Item title (e.g., 'Frontend delivery')"
                                             value={item.title}
                                             onChange={(e) => handleChangeTitle(e.target.value, item.id)}
                                         />
-                                        <Textarea 
-                                            placeholder="Item description (optional, e.g., 'Project Alpha - 40 hours of frontend work')" 
+                                        <Textarea
+                                            placeholder="Item description (optional, e.g., 'Project Alpha - 40 hours of frontend work')"
                                             value={item.description}
                                             onChange={(e) => handleChangeDescription(e.target.value, item.id)}
                                             className="min-h-16 resize-none"
                                         />
-                                        <Input 
-                                            type='number' 
-                                            inputMode="decimal" 
-                                            min='0' 
+                                        <Input
+                                            type='number'
+                                            inputMode="decimal"
+                                            min='0'
                                             step='0.01'
-                                            placeholder='Amount (USD)' 
-                                            onChange={(e) => handleChangeAmount(e.target.value, item.id)} 
-                                            value={item.amount || ''} 
+                                            placeholder='Amount (USD)'
+                                            onChange={(e) => handleChangeAmount(e.target.value, item.id)}
+                                            value={item.amount || ''}
                                         />
                                     </div>
                                     {items.length > 1 && (
-                                        <Button 
+                                        <Button
                                             type="button"
-                                            variant="ghost" 
-                                            size="sm" 
+                                            variant="ghost"
+                                            size="sm"
                                             onClick={() => handleRemoveItem(item.id)}
                                             className="mt-2"
                                         >
@@ -182,9 +195,9 @@ export const PaymentRequestForm: React.FC<Props> = ({ onSubmit, price, settings,
                             ))}
                         </CardContent>
                         <CardFooter className="flex flex-col gap-3">
-                            <Button 
+                            <Button
                                 type="button"
-                                variant="outline" 
+                                variant="outline"
                                 onClick={handleAddItem}
                                 className="w-full"
                             >
@@ -232,12 +245,26 @@ export const PaymentRequestForm: React.FC<Props> = ({ onSubmit, price, settings,
                     </Card>
                     <Card>
                         <CardHeader>
-                            <CardTitle className="text-lg font-semibold text-black">Discount percentage</CardTitle>
-                            <CardDescription className="">What is the maximum discount (%) a customer can receive by redeeming tokens?</CardDescription>
+                            <CardTitle className="text-lg font-semibold text-black">Loyalty rewards</CardTitle>
+                            <CardDescription>
+                                Let customers earn and redeem loyalty tokens for discounts on future purchases.
+                            </CardDescription>
                         </CardHeader>
-                        <CardContent className="flex flex-col gap-2">
-                            <Input type="number" min="0" max="100" step="5" value={discountRate} onChange={(e) => handleDiscountChange(e.target.value)} />
-                            <p className="text-xs text-gray-400">For exemple with a ${totalAmount.toFixed(2)} request, customer could have a max discount of ${(totalAmount - (totalAmount * (1 - discountRate / 100))).toFixed(2)}</p>
+                        <CardContent className="flex flex-col gap-5">
+                            <div className="flex gap-2 bg-gray-50 p-2 border border-border rounded-lg">
+                                <div className="flex flex-col gap-2">
+                                    <Label htmlFor="allow-discount" className="hover:cursor-pointer">Enable token redemption</Label>
+                                    <p className="text-xs text-muted-foreground">Customers can use their loyalty tokens to reduce the total at checkout.</p>
+                                </div>
+                                <Switch checked={allowDiscount} onCheckedChange={handleActiveDiscount} id="allow-discount"/>
+                            </div>
+                            {allowDiscount &&
+                                <div className="flex flex-col gap-2">
+                                    <p className="text-sm text-muted-foreground">Set the maximum percentage discount customers can unlock using tokens.</p>
+                                    <Input type="number" min="0" max="100" step="5" value={discountRate} onChange={(e) => handleDiscountChange(e.target.value)} />
+                                    <p className="text-xs text-gray-400">Example: For a $1000 order, customers could redeem up to ${(1000 - (1000 * (1 - discountRate / 100))).toFixed(2)} in discounts.</p>
+                                </div>
+                            }
                         </CardContent>
                     </Card>
                     {ready && <DialogFooter>

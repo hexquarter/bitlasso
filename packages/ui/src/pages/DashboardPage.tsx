@@ -363,7 +363,7 @@ export const DashboardPage = () => {
     }
 
     const handleSend = async (method: 'spark' | 'lightning' | 'bitcoin', asset: Asset, amount: number, recipient: string) => {
-        if (!wallet || !settings) return
+        if (!wallet) return
         await send(wallet, asset, amount, recipient, method)
     }
 

@@ -100,8 +100,8 @@ export const Send: React.FC<Props> = ({ wallet, assets, price, onSend }) => {
             finally {
                 setLoading(false)
                 setOpen(false)
+                cleanUp()
             }
-            cleanUp()
         }
     }
 

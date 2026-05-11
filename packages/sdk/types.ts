@@ -3,7 +3,7 @@
  */
 
 import type { DepositInfo, Seed, Payment as BreezPayment } from "@breeztech/breez-sdk-spark/web";
-import type { NostrConnection } from "./nostr";
+import type { NostrConnection, RelayConfig } from "./nostr";
 
 /**
  * Configuration options for the SDK
@@ -229,6 +229,7 @@ export type AuthMethod = { type: 'mnemonic', mnemonic: string } | { type: 'nsec'
 export interface AuthConfig {
     seed: Seed;
     breezApiKey: string;
+    relayConfig: RelayConfig
 }
 
 /**

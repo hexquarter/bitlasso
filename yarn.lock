@@ -254,9 +254,6 @@
   dependencies:
     "@noble/curves" "^1.7.0"
 
-"@bitlasso/sdk@file:packages/sdk/dist":
-  version "0.0.0"
-
 "@breeztech/breez-sdk-spark@^0.13.1":
   version "0.13.1"
   resolved "https://registry.npmjs.org/@breeztech/breez-sdk-spark/-/breez-sdk-spark-0.13.1.tgz"

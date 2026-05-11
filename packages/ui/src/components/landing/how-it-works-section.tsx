@@ -25,13 +25,13 @@ const steps = [
     description: "Generate a Lightning invoice via UI or API. Funds settle in <10 seconds with cryptographic confirmation. Webhooks fire immediately when payment is confirmed.",
     img: PaymentCertificate,
   },
-  {
-    icon: Award,
-    title: "Issue earned credits (optional)",
-    description: "Issue self-custodial credit manually today or via webhook automation. Represents value earned value from completed work.",
-    img: MintCredits,
+    {
+      icon: Award,
+      title: "Automated Earned credits",
+      description: "Payments automatically mint reusable self-custodial credits tied to real work and future redemption flows.",
+      img: MintCredits,
 
-  },
+    },
   {
     icon: RotateCcw,
     title: "Credits enable repeat payments",

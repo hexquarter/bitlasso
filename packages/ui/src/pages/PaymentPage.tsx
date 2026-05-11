@@ -3,7 +3,7 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Spinner } from "@/components/ui/spinner"
 import { Client, fetchEarnRequest, fetchPaymentRequest, fetchSettingsByPubkey, getBitcoinPrice, parseLightningInvoiceAmount, RelayConfig, subscribePayment, subscribeRedeem, type PaymentRequest } from "@bitlasso/sdk"
 import { formatTime } from "@/lib/utils"
-import { CheckCircle, Copy, GiftIcon } from "lucide-react"
+import { CheckCircle, Copy, GiftIcon, Wallet } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { useParams } from "react-router"
 
@@ -402,7 +402,7 @@ const PendingPaymentState: React.FC<{
                                 <p className="font-semibold">Earn BITL</p>
                                 <p className="text-sm text-muted-foreground">Every dollar you pay mints 1 BITL. <br />Spend it on discounts at any BitLasso merchant.</p>
                                 <Input placeholder="Enter your Spark address to receive 1 BIT: spark1..." className="bg-white" value={sparkAddress} onChange={(e) => handleSparkAddress(e.target.value)} />
-                                {availableWallet && <Button variant='outline' disabled={connectLoading} onClick={() => connectWallet()}>{connectLoading ? <Spinner /> : 'Connect with XVerse'}</Button>}
+                                {availableWallet && <Button variant='outline' disabled={connectLoading} onClick={() => connectWallet()}>{connectLoading ? <Spinner /> : <span className="flex gap-2 items-center">Connect XVerse wallet <Wallet /></span>}</Button>}
                                 {!availableWallet && <p className="text-xs text-center">Don't have a Spark wallet, get <a href="https://xverse.app" target="_blank" className="text-primary hover:underline">XVerse</a></p>}
                             </div>
                         }

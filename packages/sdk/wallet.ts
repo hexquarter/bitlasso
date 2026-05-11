@@ -23,7 +23,7 @@ import type {
     BreezEvent
 } from './types';
 import { SDKError } from './types';
-import { connectViaNsec, deriveNsec, type NostrConnection } from "./nostr";
+import { connectViaNsec, deriveNsec, fetchSettings, registerSettings, type NostrConnection } from "./nostr";
 import { uint8ArrayToNum } from "./utils";
 import { bytesToHex } from "nostr-tools/utils";
 
@@ -76,7 +76,7 @@ export type Wallet = WalletOperations & TypedEventEmitter<BreezEvent>
      * @returns Wallet instance
      * @throws {SDKError} If initialization fails
      */
-export const initializeWallet = async (auth: AuthConfig, nostrConnection?: NostrConnection): Promise<BitlassoWallet> => {
+export const initializeWallet = async (auth: AuthConfig, _nostrConnection?: NostrConnection): Promise<BitlassoWallet> => {
     // Initialise the WebAssembly module
     await initBreezSDK();
 
@@ -97,10 +97,13 @@ export const initializeWallet = async (auth: AuthConfig, nostrConnection?: Nostr
             sparkPrivateModeEnabled: false
         })
 
-        if (!nostrConnection) {
+        let nostrConnection: NostrConnection
+        if (!_nostrConnection) {
             const nsec = deriveNsec(auth.seed.type == 'mnemonic' ? auth.seed.mnemonic : new Uint8Array(auth.seed))
             const connection = connectViaNsec(nsec)
             nostrConnection = connection
+        } else {
+            nostrConnection = _nostrConnection
         }
 
         const info = await sdk.getInfo({})
@@ -202,6 +205,17 @@ export const initializeWallet = async (auth: AuthConfig, nostrConnection?: Nostr
         }
         catch (e) {
             console.error('failed to process unclaimed deposits', e)
+        }
+
+        let settings = await fetchSettings(auth.relayConfig, instance)
+        if (!settings) {
+            await registerSettings(auth.relayConfig, instance, {
+                sparkIdentityKey: instance.identityPubkey
+            })
+        }
+        else if (!settings.sparkIdentityKey) {
+            settings.sparkIdentityKey = instance.identityPubkey
+            await registerSettings(auth.relayConfig, instance, settings)
         }
 
         return instance;

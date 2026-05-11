@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import posthog from 'posthog-js';
 import type { Seed } from '@breeztech/breez-sdk-spark/web';
 import { getWallet, isPasskeyMode } from '@/lib/passkey';
-import { type Wallet, initializeWallet } from '@bitlasso/sdk';
+import { RelayConfig, type Wallet, initializeWallet } from '@bitlasso/sdk';
 
 export interface WalletContextType {
     storeWallet: (mnemonic: string) => Promise<Wallet>;
@@ -40,7 +40,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         }
         const wallet = await initializeWallet({
             seed,
-            breezApiKey: import.meta.env.VITE_BREEZ_API_KEY || ''
+            breezApiKey: import.meta.env.VITE_BREEZ_API_KEY || '',
+            relayConfig: new RelayConfig({ dev: import.meta.env.DEV })
         });
         walletRef.current = wallet
         setWallet(wallet);

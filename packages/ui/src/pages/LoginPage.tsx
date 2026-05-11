@@ -37,18 +37,6 @@ export const LoginPage = () => {
         posthog?.identify(sparkAddress)
         void (() => posthog?.capture('wallet_connected'))()
 
-        const settings = await fetchSettings(relayConfig, wallet)
-        if (!settings) {
-            console.log('initializing wallet settings')
-            await registerSettings(relayConfig, wallet, {
-                sparkIdentityKey: wallet.identityPubkey
-            })
-        }
-        else if (!settings.sparkIdentityKey) {
-            settings.sparkIdentityKey = wallet.identityPubkey
-            await registerSettings(relayConfig, wallet, settings)
-        }
-
         setLoading(false)
         navigate('/app/dashboard', { replace: true })
     }
@@ -60,18 +48,6 @@ export const LoginPage = () => {
         const sparkAddress = await wallet.getSparkAddress()
         posthog?.identify(sparkAddress)
         posthog?.capture('wallet_created')
-
-        const settings = await fetchSettings(relayConfig, wallet)
-        if (!settings) {
-            console.log('initializing wallet settings')
-            await registerSettings(relayConfig, wallet, {
-                sparkIdentityKey: wallet.identityPubkey
-            })
-        }
-        else if (!settings.sparkIdentityKey) {
-            settings.sparkIdentityKey = wallet.identityPubkey
-            await registerSettings(relayConfig, wallet, settings)
-        }
 
         setLoading(false)
         navigate('/app/dashboard', { replace: true })
@@ -86,18 +62,6 @@ export const LoginPage = () => {
             console.log('passkey authentication successful, wallet connected')
             const sparkAddress = await wallet.getSparkAddress()
             posthog?.identify(sparkAddress)
-
-            const settings = await fetchSettings(relayConfig, wallet)
-            if (!settings) {
-                console.log('initializing wallet settings')
-                await registerSettings(relayConfig, wallet, {
-                    sparkIdentityKey: wallet.identityPubkey
-                })
-            }
-            else if (!settings.sparkIdentityKey) {
-                settings.sparkIdentityKey = wallet.identityPubkey
-                await registerSettings(relayConfig, wallet, settings)
-            }
 
             setLoading(false)
             navigate('/app/dashboard', { replace: true })
@@ -117,26 +81,15 @@ export const LoginPage = () => {
             posthog?.identify(sparkAddress)
             void (() => posthog?.capture('wallet_recovered_nostr'))()
 
-            const settings = await fetchSettings(relayConfig, wallet)
-            if (!settings) {
-                console.log('initializing wallet settings')
-                await registerSettings(relayConfig, wallet, {
-                    notification: {
+            let settings = await fetchSettings(relayConfig, wallet)
+            if (settings) {
+                if (!settings.notification) {
+                    settings.notification = {
                         npub: nostrConnection.npub
-                    },
-                    sparkIdentityKey: wallet.identityPubkey
-                })
-            }
-            else if (!settings.sparkIdentityKey) {
-                settings.sparkIdentityKey = wallet.identityPubkey
-                settings.notification = {
-                    npub: nostrConnection.npub
+                    }
                 }
-                await registerSettings(relayConfig, wallet, settings)
-            }
-            else {
-                settings.notification = {
-                    npub: nostrConnection.npub
+                else {
+                    settings.notification.npub = nostrConnection.npub
                 }
                 await registerSettings(relayConfig, wallet, settings)
             }

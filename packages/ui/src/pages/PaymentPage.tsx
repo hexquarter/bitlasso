@@ -1,13 +1,13 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Spinner } from "@/components/ui/spinner"
-import { Client, fetchPaymentRequest, fetchSettingsByPubkey, getBitcoinPrice, parseLightningInvoiceAmount, RelayConfig, subscribePayment, subscribeRedeem, type PaymentRequest } from "@bitlasso/sdk"
+import { Client, fetchEarnRequest, fetchPaymentRequest, fetchSettingsByPubkey, getBitcoinPrice, parseLightningInvoiceAmount, RelayConfig, subscribePayment, subscribeRedeem, type PaymentRequest } from "@bitlasso/sdk"
 import { formatTime } from "@/lib/utils"
 import { CheckCircle, Copy, GiftIcon } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { useParams } from "react-router"
 
-import { getProviders } from "sats-connect";
+import { AddressPurpose, getProviders, request } from "sats-connect";
 import { toast } from "sonner"
 
 import LogoPng from '../../public/logo.svg'
@@ -16,6 +16,7 @@ import QRCode from "react-qr-code"
 import { LoyaltySection } from "@/components/payment/loyalty-section"
 import { PaidRequest } from "@/components/payment/paid-request"
 import { Slider } from "@/components/ui/slider"
+import { Input } from "@/components/ui/input"
 
 type PaymentConfirmation = { transaction: string, settlementMode: string, btcAmount: number }
 
@@ -178,6 +179,12 @@ const PendingPaymentState: React.FC<{
             setAvailableWallet(true)
         }
 
+        fetchEarnRequest(relayConfig, paymentRequest.id).then((earnRequest) => {
+            if (earnRequest) {
+                setSparkAddress(earnRequest.sparkAddress)
+            }
+        })
+
         void (() => {
             fetch(`https://api.sparkscan.io/v1/tokens/${paymentRequest.tokenId}`)
                 .then(async (r) => {
@@ -244,6 +251,44 @@ const PendingPaymentState: React.FC<{
     const [copied, setCopied] = useState(false);
     const [openedLoyalty, setOpenLoyalty] = useState(false)
 
+    const [sparkAddress, setSparkAddress] = useState<undefined | string>(undefined)
+    const [connectLoading, setConnectLoading] = useState(false)
+
+    const handleSparkAddress = (value: string) => {
+        setSparkAddress(value)
+    }
+
+    useEffect(() => {
+        if (!sparkAddress || sparkAddress == '') return
+
+        setTimeout(async () => {
+            try {
+                const client = new Client({ dev: import.meta.env.DEV });
+                await client.publishEarnRequest(
+                    paymentRequest.id,
+                    sparkAddress
+                );
+            } catch (error) {
+                console.error("Failed to publish earn request:", error);
+            }
+        }, 500); // Adjust delay as needed
+    }, [sparkAddress])
+
+    const connectWallet = async () => {
+        setConnectLoading(true)
+        const data = await request('getAccounts', { purposes: [AddressPurpose.Spark] });
+        setConnectLoading(false)
+        if (data.status !== 'success') {
+            return;
+        }
+        const address = data.result.at(0)?.address;
+        if (!address) {
+            return;
+        }
+
+        setSparkAddress(address);
+    }
+
     return (
         <div className="min-h-screen bg-neutral-50 flex items-center justify-center p-6">
             <div className="w-full max-w-md">
@@ -292,8 +337,8 @@ const PendingPaymentState: React.FC<{
                             <div className="flex justify-center items-center gap-2">
                                 <span className="text-xs text-neutral-400">Net: {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(paymentRequest.amount)}</span>
                                 <span className="text-xs text-neutral-400">{
-                                    paymentRequest.vat !== undefined 
-                                        ?  `VAT: ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(paymentRequest.amount * (1 + (paymentRequest.vat / 100)))} (${paymentRequest.vat}%)` 
+                                    paymentRequest.vat !== undefined
+                                        ? `VAT: ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(paymentRequest.amount * (1 + (paymentRequest.vat / 100)))} (${paymentRequest.vat}%)`
                                         : 'VAT not applied'
                                 }</span>
                             </div>
@@ -352,11 +397,21 @@ const PendingPaymentState: React.FC<{
                             )}
                         </div>
 
+                        {paymentRequest.discountRate > 0 &&
+                            <div className="flex flex-col gap-2 bg-gray-50 rounded-lg border border-border/40 p-5">
+                                <p className="font-semibold">Earn BITL</p>
+                                <p className="text-sm text-muted-foreground">Every dollar you pay mints 1 BITL. <br />Spend it on discounts at any BitLasso merchant.</p>
+                                <Input placeholder="Enter your Spark address to receive 1 BIT: spark1..." className="bg-white" value={sparkAddress} onChange={(e) => handleSparkAddress(e.target.value)} />
+                                {availableWallet && <Button variant='outline' disabled={connectLoading} onClick={() => connectWallet()}>{connectLoading ? <Spinner /> : 'Connect with XVerse'}</Button>}
+                                {!availableWallet && <p className="text-xs text-center">Don't have a Spark wallet, get <a href="https://xverse.app" target="_blank" className="text-primary hover:underline">XVerse</a></p>}
+                            </div>
+                        }
                         {/* CTA */}
                         <div className="flex gap-2">
                             <Button className="flex-1" onClick={() => window.open("lightning:" + lightningInvoice)}>
                                 Pay with Lightning
                             </Button>
+
                             {maxRedeemableToken > 0 && !openedLoyalty &&
                                 <Button variant={'outline'} className="flex-1" onClick={() => setOpenLoyalty(true)}><GiftIcon className="text-primary" /> Save up to {paymentRequest.discountRate}%</Button>
                             }

@@ -7,7 +7,7 @@ import { useNavigate } from "react-router";
 import { useWallet } from "@/hooks/use-wallet";
 import { usePostHog } from "@posthog/react";
 
-import LogoPng from '../../public/logo.svg'
+import LogoPng from '../../../public/logo.svg'
 import { Button } from "@/components/ui/button";
 import PasskeyPage from "@/components/auth/passkey";
 import { NostrRecoverPassphrase } from "@/components/auth/nostr-recover";

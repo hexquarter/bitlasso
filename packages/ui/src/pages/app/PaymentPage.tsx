@@ -10,7 +10,7 @@ import { useParams } from "react-router"
 import { AddressPurpose, getProviders, request } from "sats-connect";
 import { toast } from "sonner"
 
-import LogoPng from '../../public/logo.svg'
+import LogoPng from '../../../public/logo.svg'
 import QRCode from "react-qr-code"
 
 import { LoyaltySection } from "@/components/payment/loyalty-section"

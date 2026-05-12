@@ -3,16 +3,11 @@
 import { useState } from "react"
 import { Menu, X } from "lucide-react"
 
-// const links = [
-//     // { label: "Problem", href: "#problem" },
-//     // { label: "How it works", href: "#how-it-works" },
-//     // { label: "Why Lightning", href: "#why-lightning" },
-//     // { label: "Real Rewards", href: "#orwa" },
-//     // { label: "Pricing", href: "#pricing" },
-//     // { label: "Developers", href: "#for-developers" },
-//     // { label: "Decentralized", href: "#decentralized" },
-//     // { label: "Self-custodial", href: "#self-custody"},
-// ]
+const links = [
+    { label: "Open Protocol", href: "/protocol" },
+    { label: "Use Cases", href: "/usecases" },
+    { label: "Developer", href: "/developers" },
+]
 
 import LogoPng from '../../../public/logo.svg'
 import { Link } from "react-router"
@@ -36,7 +31,7 @@ export function Navbar() {
                             </div>
                         </div>
 
-                        {/* <div className="hidden gap-1 md:flex">
+                        <div className="hidden gap-1 md:flex">
                             {links.map((l) => (
                                 <Link
                                     key={l.href}
@@ -46,7 +41,7 @@ export function Navbar() {
                                     {l.label}
                                 </Link>
                             ))}
-                        </div> */}
+                        </div>
 
                     </div>
 
@@ -70,7 +65,7 @@ export function Navbar() {
             {open && (
                 <div className="mx-6 mt-2 rounded-2xl border border-border/40 bg-card/95 p-6 shadow-lg backdrop-blur-2xl sm:mx-10 md:hidden lg:mx-16">
                     <div className="flex flex-col gap-1">
-                        {/* {links.map((l) => (
+                        {links.map((l) => (
                             <Link
                                 key={l.href}
                                 to={l.href}
@@ -79,7 +74,7 @@ export function Navbar() {
                             >
                                 {l.label}
                             </Link>
-                        ))} */}
+                        ))}
                         <Link
                             to="/app"
                             onClick={() => setOpen(false)}

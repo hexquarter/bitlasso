@@ -19,16 +19,15 @@ export const PaidRequest: React.FC<{ paymentRequest: PaymentRequest, btcAmount: 
                 </div>
                 <Card className="rounded-2xl shadow-sm border bg-white p-0 gap-0 shadow-xs not-sm:rounded-none">
                     <CardHeader className='flex flex-col p-0! md:items-center justify-between border-b border-border/60 p-4!'>
-                        <span className="text-xs text-neutral-400">Payment confirmation for:</span>
-                        <h1 className="text-lg text-muted-foreground">{paymentRequest.orgDetails ? (paymentRequest.orgDetails as OrgSettings).name : ''}</h1>
+                        <span className="text-xs text-neutral-400">Payment confirmation {paymentRequest.orgDetails ? 'for: ' : ''}</span>
+                        <h1 className={`text-lg text-muted-foreground ${paymentRequest.orgDetails ? 'block' : 'hidden'}`}>{paymentRequest.orgDetails ? (paymentRequest.orgDetails as OrgSettings).name : ''}</h1>
                     </CardHeader>
                     <CardContent className="p-6 space-y-6">
                         <div className="flex flex-col gap-2 py-5 items-center">
                             <div className="flex items-center p-3 bg-green-600/20 rounded-full"><CheckCircle2 className="h-6 w-6 text-green-800" /></div>
                             <p className="font-semibold">
-                                The payment has been received.
+                                The payment has been settled.
                             </p>
-                            <p className="text-center text-sm">{paymentRequest.orgDetails ? (paymentRequest.orgDetails as OrgSettings).name : ''} has been notified and will follow up shortly.</p>
                             <p className="italic mt-5 text-xs">Payment details below:</p>
                         </div>
                         {paymentRequest.items && paymentRequest.items.length > 0 ? (

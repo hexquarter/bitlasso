@@ -1,5 +1,5 @@
 import { Route, Routes } from "react-router"
-import { LoginPage } from "./pages/LoginPage"
+import { LoginPage } from "./pages/app/LoginPage"
 // import { PasskeyPage } from "./pages/PasskeyPage"
 
 export const Auth = () => {

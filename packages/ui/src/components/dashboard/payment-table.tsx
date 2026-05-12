@@ -130,7 +130,6 @@ const getColumns = () => {
                 }
 
                 const paymentPageLink = row.original.sharingKey ? `#/payment/${row.original.id}?key=${row.original.sharingKey}` : `#/payment/${row.original.id}`
-                const certPageLink = row.original.sharingKey ? `#/payment/${row.original.id}/certificate?key=${row.original.sharingKey}` : `#/payment/${row.original.id}/certificate`
 
                 return (
                     <DropdownMenu>
@@ -149,7 +148,7 @@ const getColumns = () => {
                             {!row.original.settleTx && <DropdownMenuItem onClick={() => window.open(paymentPageLink, '_blank')}>Open payment's page <ExternalLink /></DropdownMenuItem>}
                             {settleTxUrl && <DropdownMenuItem onClick={() => window.open(settleTxUrl, '_blank')}>Open settlement transaction <ExternalLink /></DropdownMenuItem>}
                             {redeemTxUrl && <DropdownMenuItem onClick={() => window.open(redeemTxUrl, '_blank')}>Open redeem transaction <ExternalLink /></DropdownMenuItem>}
-                            {row.original.settleTx && <DropdownMenuItem onClick={() => window.open(certPageLink, '_blank')}>Open payment certificate<ExternalLink /></DropdownMenuItem>}
+                            {row.original.settleTx && <DropdownMenuItem onClick={() => window.open(paymentPageLink, '_blank')}>Open payment certificate<ExternalLink /></DropdownMenuItem>}
                         </DropdownMenuContent>
                     </DropdownMenu>
                 )

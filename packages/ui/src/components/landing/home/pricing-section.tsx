@@ -3,7 +3,7 @@
 import { useRef, useState } from "react"
 import { Check, ArrowRight } from "lucide-react"
 import { useInView } from "@/hooks/use-in-view"
-import { Button } from "../ui/button"
+import { Button } from "../../ui/button"
 
 const included = [
   "Instant Lightning settlement",

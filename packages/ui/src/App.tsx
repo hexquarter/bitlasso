@@ -1,7 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router'
 
-import { DashboardPage } from './pages/DashboardPage'
-import { SettingsPage } from './pages/Settings'
+import { DashboardPage } from './pages/app/DashboardPage'
+import { SettingsPage } from './pages/app/Settings'
 
 function App() {
   return (

@@ -5,10 +5,10 @@ import { FileText, Zap, RotateCcw } from "lucide-react"
 import { useInView } from "@/hooks/use-in-view"
 
 
-import CreatePaymentRequest from '../../../public/create_payment_request.png'
-import Carbon from '../../../public/carbon.png'
-import PaymentCertificate from '../../../public/payment_cert.png'
-import Redeeem from '../../../public/redeem2.jpg'
+import CreatePaymentRequest from '../../../../public/create_payment_request.png'
+import Carbon from '../../../../public/carbon.png'
+import PaymentCertificate from '../../../../public/payment_cert.png'
+import Redeeem from '../../../../public/redeem2.jpg'
 
 const steps = [
   {

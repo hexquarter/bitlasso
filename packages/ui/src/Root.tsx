@@ -1,14 +1,16 @@
 import { HashRouter, Route, Routes, useLocation } from "react-router"
-import { LandingPage } from "./pages/LandingPage"
+import { HomePage } from "./pages/landing/HomePage"
 import { AppRoot } from "./AppRoot"
 import { WalletProvider } from "./hooks/use-wallet"
 import { SettingsProvider } from "./hooks/use-settings"
 import { Toaster } from "sonner"
-import { PaymentPage } from "./pages/PaymentPage"
+import { PaymentPage } from "./pages/app/PaymentPage"
 import { useEffect, useRef } from "react"
-import { CertPage } from "./pages/CertPage"
-import { TermsPage } from "./pages/TermsPage"
-import { PrivacyPage } from "./pages/PrivacyPage"
+import { TermsPage } from "./pages/landing/TermsPage"
+import { PrivacyPage } from "./pages/landing/PrivacyPage"
+import { DeveloperPage } from "./pages/landing/DeveloperPage"
+import { UsecasePage } from "./pages/landing/UsecasePage"
+import { ProtocolPage } from "./pages/landing/ProtocolPage"
 
 function ScrollToAnchor() {
     const location = useLocation();
@@ -38,7 +40,10 @@ export const Root = () => {
     return (
         <HashRouter>
             <Routes>
-                <Route path='/' Component={LandingPage} />
+                <Route path='/' Component={HomePage} />
+                <Route path='/usecases' Component={UsecasePage} />
+                <Route path='/protocol' Component={ProtocolPage} />
+                <Route path='/developers' Component={DeveloperPage} />
                 <Route path='/terms' Component={TermsPage} />
                 <Route path='/privacy' Component={PrivacyPage} />
                 <Route path='/app/*' element={
@@ -50,9 +55,6 @@ export const Root = () => {
                 } />
                 <Route path='/payment/:id' element={<SettingsProvider>
                     <PaymentPage />
-                </SettingsProvider>} />
-                <Route index path='/payment/:id/certificate' element={<SettingsProvider>
-                    <CertPage />
                 </SettingsProvider>} />
             </Routes>
             <Toaster />

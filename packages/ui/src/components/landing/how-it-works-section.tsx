@@ -1,21 +1,20 @@
 "use client"
 
 import { useRef, useState } from "react"
-import { FileText, Zap, Award, RotateCcw } from "lucide-react"
+import { FileText, Zap, RotateCcw } from "lucide-react"
 import { useInView } from "@/hooks/use-in-view"
 
 
 import CreatePaymentRequest from '../../../public/create_payment_request.png'
 import Carbon from '../../../public/carbon.png'
 import PaymentCertificate from '../../../public/payment_cert.png'
-import MintCredits from '../../../public/mint_credit.png'
 import Redeeem from '../../../public/redeem2.jpg'
 
 const steps = [
   {
     icon: FileText,
     title: "Create a payment request",
-    description: "Generate via UI or API. Attach it to a project, API call, or milestone. Optionally define a credit issuance rule for later use.",
+    description: "Generate via UI or API. Attach it to a project, API call, or milestone.",
     img: CreatePaymentRequest,
     img2: Carbon,
   },
@@ -25,17 +24,10 @@ const steps = [
     description: "Generate a Lightning invoice via UI or API. Funds settle in <10 seconds with cryptographic confirmation. Webhooks fire immediately when payment is confirmed.",
     img: PaymentCertificate,
   },
-    {
-      icon: Award,
-      title: "Automated Earned credits",
-      description: "Payments automatically mint reusable self-custodial credits tied to real work and future redemption flows.",
-      img: MintCredits,
-
-    },
   {
     icon: RotateCcw,
-    title: "Credits enable repeat payments",
-    description: "Credits can be redeemed against future invoices creating optional retention and incentive loops on top of Lightning payments.",
+    title: "Credits power repeat payments",
+    description: "Payments mint reusable credits that can be redeemed on future invoices, enabling automated rewards and retention loops.",
     img: Redeeem,
   },
 ]
@@ -47,7 +39,7 @@ export function HowItWorksSection() {
   const [selected, setSelected] = useState(0)
 
   return (
-    <section id="how-it-works" className="relative overflow-hidden border-t border-border/40 bg-white px-6 py-32 sm:px-10 md:py-40 lg:px-16">
+    <section id="how-it-works" className="relative overflow-hidden border-t border-border/40 bg-slate-50 px-6 py-32 sm:px-10 md:py-40 lg:px-16 ">
       <div ref={ref} className="mx-auto max-w-[90rem]">
         <div className="flex flex-col gap-8">
           <div className={`transition-all duration-1000`}>
@@ -74,9 +66,9 @@ export function HowItWorksSection() {
               <img src={steps[selected].img} className="rounded-sm" />
             </div>
           </div>
-          <div className="flex flex-col gap-2 w-1/2">
+          <div className="flex flex-col w-1/2">
             {steps.map((item, i) => (
-              <div className={`flex px-5 py-5 items-center gap-5 transition hover:cursor-pointer border-0 border-l-3 ${selected == i ? 'text-primary  border-l-primary' : 'text-foreground'}`} key={i} onClick={() => setSelected(i)}>
+              <div className={`bg-white flex px-5 py-5 items-center gap-5 transition hover:cursor-pointer border-0 border-l-3 ${selected == i ? 'text-primary  border-l-primary' : 'text-foreground'}`} key={i} onClick={() => setSelected(i)}>
                 <div className={`flex h-15 w-15 items-center justify-center rounded-2xl p-3 rounded-full text-primary ${selected == i ? 'bg-primary' : 'bg-white'}`}>
                   <item.icon className={`h-5 w-5  ${selected == i ? 'text-white' : 'text-primary'}`} />
                 </div>

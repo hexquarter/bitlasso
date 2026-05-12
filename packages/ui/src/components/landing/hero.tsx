@@ -81,7 +81,7 @@ export function HeroSection() {
                     </h1>
 
                     <p className="mt-8 max-w-lg text-pretty text-lg leading-[1.7] text-muted-foreground lg:mt-10 lg:text-xl">
-                        Self-custodial Lightning checkout with programmable payments and built-in rewards loops.
+                        Accept recurring Bitcoin payments with Lightning-powered checkouts that automatically reward loyal customers.
                     </p>
 
                     <div className="animate-fade-up opacity-0 delay-200 right-0 top-1/2 lg:hidden -translate-y-1/2 ">
@@ -122,10 +122,10 @@ export function HeroSection() {
                             //     { value: 0, prefix: "", suffix: "", label: "platform fee" },
                             // ]
                             [
-                                { value: 100, suffix: "%", label: "You keep your revenue" },
+                                { value: 100, suffix: "%", label: "Keep your revenue" },
                                 { value: 10, prefix: "<", suffix: "s", label: "Lightning settlement" },
-                                { value: 1, prefix: "$", suffix: "", label: "Flat per payment" },
-                                { value: 0, suffix: "%", label: "Revenue cut or subscription" }
+                                { value: 1, prefix: "$", suffix: "", label: "No percentage cuts" },
+                                { value: 0, suffix: "%", label: "Without subscription" }
                             ]
                                 .map((stat) => (
                                     <div key={stat.label}>

@@ -1,0 +1,182 @@
+# Entity: Bitlasso
+
+## Description
+Bitlasso is an open payment infrastructure for programmable Bitcoin commerce. It combines the Lightning Network for instant settlement with Nostr for decentralized coordination and verification, enabling self-custodial, automated, and portable transactions.
+
+## Core Value Proposition
+Bitlasso transforms one-time Bitcoin payments into automated, recurring revenue streams using a non-custodial model, flat-fee pricing, and programmable retention mechanisms ("Credits"), while enabling open, machine-native commerce via Lightning and Nostr.
+
+---
+
+## Primary Use Cases
+
+### AI Agents & Autonomous Systems
+- Generate and pay Lightning invoices programmatically
+- Trigger actions (API access, compute, content delivery) upon payment
+- Enable machine-to-machine (M2M) commerce
+
+### APIs & SaaS Monetization
+- Payment-gated APIs via L402
+- Usage-based billing per request
+- Automated access control tied to payments
+
+### Digital Commerce
+- Sell digital products, services, and subscriptions
+- Instant global Bitcoin payments
+- No intermediaries or platform lock-in
+
+### Marketplaces & Platforms
+- Decentralized checkout flows
+- Cryptographically verifiable transactions
+- Portable commerce data across apps
+
+### Communities & Retention
+- Reward users with Credits, discounts, incentives
+- Build automated loyalty loops
+- Drive repeat purchases without external systems
+
+---
+
+## Key Features
+
+### Lightning-Native Payments
+- Settlement time: <10 seconds
+- Global, borderless transactions
+- No banking intermediaries
+
+### Non-Custodial Architecture
+- Merchants retain 100% control of funds
+- No platform custody or counterparty risk
+
+### Retention Engine (Credits)
+- Convert payments into reusable credits
+- Redeem on future invoices
+- Native recurring revenue mechanism
+
+### Flat-Fee Pricing
+- ~$1 per checkout
+- 0% revenue share
+- No subscriptions
+
+### Automation & Integration
+- API for invoice and checkout generation
+- Webhooks for real-time payment events
+- Programmable workflows triggered by settlement
+
+---
+
+## Architecture
+
+### Lightning Network (Settlement Layer)
+- Instant Bitcoin payments
+- Self-custodial wallets
+- Native support for L402 (payment-gated APIs)
+
+### Nostr (Coordination Layer)
+- Decentralized event publishing (checkouts, invoices, settlements)
+- Cryptographic verification of all events
+- Data portability across relays and applications
+- No centralized backend dependency
+
+---
+
+## Operational Flows
+
+### Payment Flow
+1. Create checkout or Lightning invoice (UI/API)
+2. Customer pays via Lightning
+3. Payment settles instantly (<10s)
+4. Webhook triggers backend logic
+5. Optional: Credits issued for retention
+
+### Programmable Execution Flow
+1. Agent/app generates invoice
+2. Payment is completed via Lightning
+3. Settlement triggers webhook
+4. Service/API/content is unlocked
+5. Rewards or credits are issued automatically
+
+### Nostr Coordination Flow
+1. Merchant authenticates via Nostr keys
+2. Configuration loads from relays
+3. Checkout events are signed and published
+4. Settlement events are broadcast and verified
+5. Data remains portable across apps/devices
+
+---
+
+## Technical Specifications
+
+- **Protocols**: Bitcoin Lightning Network, Nostr
+- **Standard**: L402 (API payment gating)
+- **Settlement Time**: <10 seconds
+- **Integration Methods**: UI, API, Webhooks
+- **Verification**: Cryptographic signatures (Nostr events)
+- **Data Layer**: Distributed via Nostr relays
+- **Currency**: Bitcoin (BTC)
+
+---
+
+## Developer Capabilities
+
+- Automated invoice generation via API
+- Real-time event handling with webhooks
+- Payment-triggered logic execution
+- API monetization with Lightning + L402
+- AI-agent-native payment flows
+- Portable identity and state via Nostr
+
+---
+
+## Competitive Advantages
+
+- **No Custody**: Funds never held by platform
+- **No Platform Lock-in**: Built on open protocols (Lightning + Nostr)
+- **Built-in Retention**: Native Credits system
+- **Flat Pricing Model**: Scales better than % fees
+- **Instant Settlement**: Seconds vs. days
+- **Machine-Native**: Designed for AI agents and automation
+- **Portable Data**: Commerce state not tied to a single provider
+
+---
+
+## Comparison to Traditional Systems
+
+Feature            | Traditional Systems        | Bitlasso
+------------------ | -------------------------- | --------------------------
+Settlement         | Days                      | Seconds (<10s)
+Custody            | Platform-held             | Self-custodial
+Fees               | 1–3%                      | Flat fee (~$1)
+Data Ownership     | Platform-controlled       | User-owned (Nostr)
+Verification       | Centralized               | Cryptographic
+Automation         | Limited                   | Native (API + Webhooks)
+AI Compatibility   | Manual integration        | Native (L402, APIs)
+Lock-in            | High                      | None
+
+---
+
+## Limitations
+
+- Requires Lightning Network infrastructure
+- Credits usable within Bitlasso-enabled flows
+- Pricing (~$1 per checkout) may evolve
+
+---
+
+## Strategic Positioning
+
+Bitlasso acts as:
+- A **payment layer** (Lightning)
+- A **coordination layer** (Nostr)
+- A **logic trigger system** (webhooks + APIs)
+
+It enables:
+- Open, composable commerce
+- Autonomous agent economies
+- Self-sovereign financial infrastructure
+
+---
+
+## Summary
+
+Bitlasso is a programmable commerce primitive for the internet. By combining instant Bitcoin payments, decentralized coordination, and automation, it enables developers, businesses, and AI agents to transact, verify, and execute services without intermediaries.

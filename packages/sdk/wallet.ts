@@ -5,7 +5,7 @@
  * abstracting away the complexity of the underlying Breez SDK.
  */
 
-import initBreezSDK, { BreezSdk, SdkBuilder, type PrepareLnurlPayResponse, type PrepareSendPaymentResponse, type SdkEvent, type Rate, type Payment, type TokenBalance, defaultConfig } from "@breeztech/breez-sdk-spark";
+import { type PrepareLnurlPayResponse, type PrepareSendPaymentResponse, type SdkEvent, type Rate, type Payment, type TokenBalance, type BreezSdk } from "@breeztech/breez-sdk-spark";
 import { SparkReadonlyClient } from "@buildonspark/spark-sdk";
 
 export { type Payment as BreezPayment } from "@breeztech/breez-sdk-spark"
@@ -70,6 +70,41 @@ export class TypedEventEmitter<Events extends EventMap> {
 
 export type Wallet = WalletOperations & TypedEventEmitter<BreezEvent>
 
+const isBrowser = () =>
+  typeof window !== "undefined" &&
+  typeof window.document !== "undefined";
+
+const isNode = () =>
+  typeof process !== "undefined" &&
+  process.versions != null &&
+  process.versions.node != null;
+
+async function initBreezSpark() {
+  if (isBrowser()) {
+    const breez = await import("@breeztech/breez-sdk-spark/web");
+
+    // WASM init REQUIRED in browser
+    await breez.default();
+
+    return {
+      platform: "web",
+      ...breez,
+    };
+  }
+
+  if (isNode()) {
+    // Node build does NOT require WASM init
+    const breez = await import("@breeztech/breez-sdk-spark/nodejs");
+
+    return {
+      platform: "node",
+      ...breez,
+    };
+  }
+
+  throw new Error("Unsupported runtime environment");
+}
+
 /**
      * Initializes a new wallet with the given authentication
      * @param auth - Authentication configuration
@@ -77,15 +112,13 @@ export type Wallet = WalletOperations & TypedEventEmitter<BreezEvent>
      * @throws {SDKError} If initialization fails
      */
 export const initializeWallet = async (auth: AuthConfig, _nostrConnection?: NostrConnection): Promise<BitlassoWallet> => {
-    // Initialise the WebAssembly module
-    await initBreezSDK();
-
     try {
-        const config = defaultConfig('mainnet')
+        const breez = await initBreezSpark();
+        const config = breez.defaultConfig('mainnet')
         config.apiKey = auth.breezApiKey
         config.maxDepositClaimFee = { type: 'networkRecommended', leewaySatPerVbyte: 1 }
 
-        let builder = SdkBuilder.new(config, auth.seed)
+        let builder = breez.SdkBuilder.new(config, auth.seed)
         builder = await builder.withDefaultStorage('./bitlasso')
         builder = builder.withKeySet({
             keySetType: 'default',

@@ -7,8 +7,8 @@
  * @packageDocumentation
  */
 
-export * from './types';
-export * from './api';
-export * from './wallet';
-export * from './utils';
-export * from './nostr'
+export * from './types.js';
+export * from './api.js';
+export * from './wallet.js';
+export * from './utils.js';
+export * from './nostr.js'

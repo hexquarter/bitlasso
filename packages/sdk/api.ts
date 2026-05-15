@@ -11,9 +11,9 @@ import type {
   PurchaseCreditsResponse,
   PublishPaymentRequestResponse,
   PaymentRequestPayload
-} from './types';
-import { SDKError } from './types';
-import type { BreezPayment, Wallet } from './wallet';
+} from './types.js';
+import { SDKError } from './types.js';
+import type { BreezPayment, Wallet } from './wallet.js';
 
 /**
  * Bitlasso's API client class

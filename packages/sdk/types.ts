@@ -3,7 +3,7 @@
  */
 
 import type { DepositInfo, Seed, Payment as BreezPayment } from "@breeztech/breez-sdk-spark/web";
-import type { NostrConnection, RelayConfig } from "./nostr";
+import type { NostrConnection, RelayConfig } from "./nostr.js";
 
 /**
  * Configuration options for the SDK

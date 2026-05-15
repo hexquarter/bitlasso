@@ -21,10 +21,10 @@ import type {
     AuthConfig,
     TokenBalanceMap,
     BreezEvent
-} from './types';
-import { SDKError } from './types';
-import { connectViaNsec, deriveNsec, fetchSettings, registerSettings, RelayConfig, type NostrConnection } from "./nostr";
-import { uint8ArrayToNum } from "./utils";
+} from './types.js';
+import { SDKError } from './types.js';
+import { connectViaNsec, deriveNsec, fetchSettings, registerSettings, RelayConfig, type NostrConnection } from "./nostr.js";
+import { uint8ArrayToNum } from "./utils.js";
 import { bytesToHex } from "nostr-tools/utils";
 
 export const BURN_PUBLIC_KEY =

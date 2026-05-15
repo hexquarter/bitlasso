@@ -4,8 +4,8 @@ import { bech32 } from "bech32";
 import { mnemonicToSeedSync } from "@scure/bip39";
 import { HDKey } from "@scure/bip32";
 
-import type { Wallet } from "./wallet";
-import type { OrgSettings, SDKConfig, UserSettings, PaymentRequest } from "./types";
+import type { Wallet } from "./wallet.js";
+import type { OrgSettings, SDKConfig, UserSettings, PaymentRequest } from "./types.js";
  
 const pool = new SimplePool({
     enablePing: true,

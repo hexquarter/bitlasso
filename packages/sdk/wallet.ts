@@ -94,7 +94,7 @@ async function initBreezSpark() {
 
   if (isNode()) {
     // Node build does NOT require WASM init
-    const breez = await import("@breeztech/breez-sdk-spark/nodejs");
+    const breez = (await import("@breeztech/breez-sdk-spark/nodejs")).default;
 
     return {
       platform: "node",

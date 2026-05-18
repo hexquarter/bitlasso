@@ -8,6 +8,7 @@ import { PostHogProvider } from '@posthog/react';
 
 posthog.init(import.meta.env.VITE_PUBLIC_POSTHOG_PROJECT_TOKEN, {
   api_host: import.meta.env.VITE_PUBLIC_POSTHOG_HOST,
+  ui_host: 'https://eu.posthog.com', // necessary because you're using a proxy, this way links will point back to PostHog properly
   defaults: '2026-01-30',
 });
 
